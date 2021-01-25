@@ -22,7 +22,7 @@ public class UserDTO {
     private String email;
 
     public UserDTO(User user) {
-        this.userName = user.getUserName();
+        this.userName = user.getUsername();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.phone = user.getPhone();

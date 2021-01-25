@@ -10,11 +10,14 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "USER")
+@Table(name = "USERS")
 public class User {
     @Id
     @Column(name = "USERNAME", nullable = false, length = 50)
-    private String userName;
+    private String username;
+
+    @Column(name = "PASSWORD", length = 100)
+    private String password;
 
     @Column(name = "FIRST_NAME", length = 100)
     private String firstName;
