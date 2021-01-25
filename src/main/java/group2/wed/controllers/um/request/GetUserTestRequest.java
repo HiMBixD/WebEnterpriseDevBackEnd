@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetUserTestRequest {
-    private UserDTO userDTO;
+    private String username;
+    private String password;
 }
