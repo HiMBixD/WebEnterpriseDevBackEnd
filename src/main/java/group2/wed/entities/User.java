@@ -1,0 +1,31 @@
+package group2.wed.entities;
+
+import lombok.*;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "USER")
+public class User {
+    @Id
+    @Column(name = "USERNAME", nullable = false, length = 50)
+    private String userName;
+
+    @Column(name = "FIRST_NAME", length = 100)
+    private String firstName;
+
+    @Column(name = "LAST_NAME", length = 100)
+    private String lastName;
+
+    @Column(name = "PHONE", length = 15)
+    private String phone;
+
+
+    @Column(name = "EMAIL", length = 200)
+    private String email;
+}
