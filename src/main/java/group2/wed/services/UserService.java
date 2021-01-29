@@ -16,21 +16,6 @@ public class UserService {
     private UserRepository userRepository;
 
     public UserDTO checkLogin(String userName, String password) throws Exception {
-//        try {
-//            if (userName == null) {
-//                throw new Exception();
-//            }
-//            Optional<User> optional = userRepository.findByUserNameAndPassword(userName, password);
-//            if (!optional.isPresent()) {
-//                throw new Exception();
-//            }
-//            UserDTO userDTO = new UserDTO(optional.get());
-//
-//            return userDTO;
-//
-//        } catch (Exception e) {
-//            throw e;
-//        }
         UserDTO userDTO = new UserDTO();
         Optional<User> optional = userRepository.findByUserNameAndPassword(userName, password);
         userDTO.setPhone(optional.get().getPhone());
@@ -38,7 +23,6 @@ public class UserService {
         userDTO.setFirstName(optional.get().getFirstName());
         userDTO.setEmail(optional.get().getEmail());
         userDTO.setUserName(optional.get().getUsername());
-
         return userDTO;
     }
 }

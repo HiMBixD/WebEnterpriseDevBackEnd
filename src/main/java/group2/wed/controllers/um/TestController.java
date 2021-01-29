@@ -7,7 +7,6 @@ import group2.wed.entities.dto.UserDTO;
 import group2.wed.services.UserService;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin("*")
 @RestController
 @RequestMapping("/test")
 public class TestController {
@@ -21,6 +20,7 @@ public class TestController {
     @PostMapping("/get/detail")
     public GetUserTestResponse getDetail(@RequestBody GetUserTestRequest request) {
         try {
+            System.out.println(request);
             GetUserTestResponse response = new GetUserTestResponse();
             UserDTO userDTO = userService.checkLogin(request.getUsername(), request.getPassword());
             response.setUserDTO(userDTO);
