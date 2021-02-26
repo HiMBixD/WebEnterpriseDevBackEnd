@@ -34,4 +34,13 @@ public class TestController {
             return response;
         }
     }
+    @GetMapping("/admin/get")
+    public String getAdmin() {
+        return "hi admin";
+    }
+
+    @GetMapping("/user/get")
+    public String getUser() {
+        return "hi user";
+    }
 }
