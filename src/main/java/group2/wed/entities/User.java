@@ -2,10 +2,8 @@ package group2.wed.entities;
 
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,4 +29,8 @@ public class User {
 
     @Column(name = "EMAIL", length = 200)
     private String email;
+
+    @ManyToOne
+    @JoinColumn(name = "ROLE_ID")
+    private RoleEntity roleEntity;
 }
