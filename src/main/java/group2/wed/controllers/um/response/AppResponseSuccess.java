@@ -1,6 +1,7 @@
 package group2.wed.controllers.um.response;
 
 import group2.wed.constant.AppConstants;
+import group2.wed.controllers.other.Message;
 
 public class AppResponseSuccess extends AppResponse{
     public AppResponseSuccess(){
@@ -9,6 +10,10 @@ public class AppResponseSuccess extends AppResponse{
     public AppResponseSuccess(Object data){
         this.setSuccess(AppConstants.RESULT_SUCCESS);
         this.setData(data);
+    }
+    public AppResponseSuccess(Message message){
+        this.setSuccess(AppConstants.RESULT_SUCCESS);
+        this.setResponseMessage(message);
     }
 
 }

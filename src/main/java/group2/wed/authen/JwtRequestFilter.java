@@ -31,15 +31,18 @@ public class JwtRequestFilter extends GenericFilterBean {
     public void doFilter(ServletRequest servletRequest,
                          ServletResponse servletResponse,
                          FilterChain filterChain) throws IOException, ServletException {
-        LOG.info("do filter...");
         String token = getTokenFromRequest((HttpServletRequest) servletRequest);
         if (token != null && jwtProvider.validateToken(token)) {
-            String userLogin = jwtProvider.getLoginFromToken(token);
-            CustomUserDetails customUserDetails = customUserDetailsService.loadUserByUsername(userLogin);
-            UsernamePasswordAuthenticationToken auth
-                    = new UsernamePasswordAuthenticationToken(
-                            customUserDetails, null, customUserDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            String userLogin = jwtProvider.getUsernameFromToken(token);
+            try {
+                CustomUserDetails customUserDetails = customUserDetailsService.loadUserByUsername(userLogin);
+                UsernamePasswordAuthenticationToken auth
+                        = new UsernamePasswordAuthenticationToken(
+                        customUserDetails, null, customUserDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }

@@ -1,5 +1,6 @@
 package group2.wed.controllers.um.response;
 
+import group2.wed.controllers.other.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AppResponse {
     private Boolean success;
-    private String message;
+    private Message responseMessage;
     private Object data;
 }
