@@ -7,4 +7,11 @@ public class AppConstants {
     public static final long JWT_EXPIRATION = 5*60*60; // unit as seconds
     public static final String AUTHORIZATION = "Authorization";
 
+    // Validator
+    public static final String NOT_NULL = "NOT_NULL";
+    public static final String NOT_ALLOWED = "NOT_ALLOWED";
+
+    public static final String NOT_FOUND = "NOT_FOUND";
+    public static final String INVALID = "INVALID";
+    public static final String EXISTED = "EXISTED";
 }

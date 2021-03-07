@@ -1,8 +1,11 @@
 package group2.wed.controllers;
 
 import group2.wed.authen.JwtProvider;
+import group2.wed.constant.AppConstants;
+import group2.wed.controllers.other.Message;
 import group2.wed.controllers.um.request.LoginRequest;
 import group2.wed.controllers.um.response.AppResponse;
+import group2.wed.controllers.um.response.AppResponseFailure;
 import group2.wed.controllers.um.response.AppResponseSuccess;
 import group2.wed.entities.dto.UserDTO;
 import group2.wed.services.UserService;
@@ -21,9 +24,18 @@ public class AuthController {
 
     @PostMapping("/auth")
     public AppResponse auth(@RequestBody LoginRequest request) {
-        UserDTO userDTO = userService.findByUsernameAndPassword(request.getUsername(), request.getPassword());
-        String token = jwtProvider.generateToken(userDTO.getUserName());
-        AppResponse response = new AppResponseSuccess(token);
-        return response;
+        Message message = new Message();
+        try {
+            UserDTO userDTO = userService.findByUsernameAndPassword(request.getUsername(), request.getPassword());
+            if (null == userDTO) {
+                message.setMessage(AppConstants.NOT_FOUND);
+                message.setErrorCode("wrongIDorPassword");
+            }
+            assert userDTO != null;
+            String token = jwtProvider.generateToken(userDTO.getUserName());
+            return new AppResponseSuccess(token);
+        } catch (Exception e) {
+            return new AppResponseFailure(message);
+        }
     }
 }
