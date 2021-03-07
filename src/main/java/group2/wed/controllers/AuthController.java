@@ -10,11 +10,13 @@ import group2.wed.controllers.um.response.AppResponseSuccess;
 import group2.wed.entities.dto.UserDTO;
 import group2.wed.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@CrossOrigin
 public class AuthController {
     @Autowired
     private UserService userService;
