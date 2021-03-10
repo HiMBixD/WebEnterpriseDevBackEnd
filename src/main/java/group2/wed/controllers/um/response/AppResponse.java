@@ -1,6 +1,6 @@
 package group2.wed.controllers.um.response;
 
-import group2.wed.controllers.other.Message;
+import group2.wed.controllers.otherComponent.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

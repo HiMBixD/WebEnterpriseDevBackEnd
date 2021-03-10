@@ -1,10 +1,11 @@
 package group2.wed.services;
 
 import group2.wed.constant.AppConstants;
-import group2.wed.controllers.other.AppResponseException;
-import group2.wed.controllers.other.Message;
+import group2.wed.controllers.otherComponent.AppResponseException;
+import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.request.CreateUserRequest;
 import group2.wed.controllers.um.request.GetUserInfoRequest;
+import group2.wed.controllers.um.request.SearchUserRequest;
 import group2.wed.controllers.um.request.UpdateUserInfoRequest;
 import group2.wed.entities.RoleEntity;
 import group2.wed.entities.User;
@@ -15,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -64,6 +67,17 @@ public class UserService {
         }
     }
 
+    public List<UserDTO> searchUsersInfo(SearchUserRequest request) {
+        try {
+            System.out.println("username"+request.getUsername());
+            List<User> users = userRepository.searchByUsername(request.getUsername());
+            System.out.println("list"+users);
+            return users.stream().map(UserDTO::new).collect(Collectors.toList());
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
     public UserDTO updateUserInfo(UpdateUserInfoRequest request, Boolean allowRoleChange) {
         try {
             if (request.getUsername().isEmpty()) {
@@ -75,11 +89,12 @@ public class UserService {
             }
 
             User user = optionalUser.get();
-            user.setUsername(request.getUsername());
-            user.setEmail(request.getEmail());
-            user.setFirstName(request.getFirstName());
-            user.setLastName(request.getLastName());
+            if (allowRoleChange) {
+                user.setEmail(request.getEmail());
+            }
             user.setPhone(request.getPhone());
+            user.setLastName(request.getLastName());
+            user.setFirstName(request.getFirstName());
 
             if (request.getRoleId() != null && allowRoleChange) {
                 Optional<RoleEntity> optionalRole = roleRepository.findByRoleId(request.getRoleId());

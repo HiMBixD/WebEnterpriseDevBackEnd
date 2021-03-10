@@ -1,7 +1,7 @@
 package group2.wed.controllers.um.response;
 
 import group2.wed.constant.AppConstants;
-import group2.wed.controllers.other.Message;
+import group2.wed.controllers.otherComponent.Message;
 
 public class AppResponseSuccess extends AppResponse{
     public AppResponseSuccess(){

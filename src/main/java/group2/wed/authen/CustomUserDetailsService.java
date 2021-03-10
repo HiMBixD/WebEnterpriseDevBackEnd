@@ -1,13 +1,12 @@
 package group2.wed.authen;
 
 import group2.wed.constant.AppConstants;
-import group2.wed.controllers.other.AppResponseException;
-import group2.wed.controllers.other.Message;
+import group2.wed.controllers.otherComponent.AppResponseException;
+import group2.wed.controllers.otherComponent.Message;
 import group2.wed.entities.User;
 import group2.wed.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
