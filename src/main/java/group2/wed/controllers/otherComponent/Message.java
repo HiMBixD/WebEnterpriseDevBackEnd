@@ -1,6 +1,5 @@
-package group2.wed.controllers.other;
+package group2.wed.controllers.otherComponent;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

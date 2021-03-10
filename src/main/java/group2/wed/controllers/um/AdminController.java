@@ -1,11 +1,13 @@
 package group2.wed.controllers.um;
 
-import group2.wed.controllers.other.AppResponseException;
+import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.um.request.CreateUserRequest;
+import group2.wed.controllers.um.request.SearchUserRequest;
 import group2.wed.controllers.um.request.UpdateUserInfoRequest;
 import group2.wed.controllers.um.response.AppResponse;
 import group2.wed.controllers.um.response.AppResponseFailure;
 import group2.wed.controllers.um.response.AppResponseSuccess;
+import group2.wed.services.CommonServices;
 import group2.wed.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,9 @@ public class AdminController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private CommonServices commonServices;
+
     @PostMapping("/create-user")
     public AppResponse registerUser(@RequestBody CreateUserRequest createUserRequest) {
         try {
@@ -34,6 +39,15 @@ public class AdminController {
     public AppResponse updateUserInfo(@RequestBody UpdateUserInfoRequest request) {
         try {
             return new AppResponseSuccess(userService.updateUserInfo(request, true));
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
+    @PostMapping("/search-users")
+    public AppResponse getUsersInfo(@RequestBody SearchUserRequest request) {
+        try {
+            return new AppResponseSuccess(userService.searchUsersInfo(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
         }

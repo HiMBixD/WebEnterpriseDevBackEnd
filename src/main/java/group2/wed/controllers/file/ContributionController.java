@@ -1,6 +1,6 @@
 package group2.wed.controllers.file;
 
-import group2.wed.controllers.other.Message;
+import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.response.AppResponse;
 import group2.wed.controllers.um.response.AppResponseFailure;
 import group2.wed.controllers.um.response.AppResponseSuccess;

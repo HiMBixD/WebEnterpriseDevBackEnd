@@ -60,6 +60,7 @@ public class FilesService implements FilesServiceInterface {
     @Override
     public void deleteAll() {
         FileSystemUtils.deleteRecursively(root.toFile());
+        LOG.info("Root Deleted");
     }
 
     @Override

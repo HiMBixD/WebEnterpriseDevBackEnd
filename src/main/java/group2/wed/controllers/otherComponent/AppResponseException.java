@@ -1,4 +1,4 @@
-package group2.wed.controllers.other;
+package group2.wed.controllers.otherComponent;
 
 public class AppResponseException extends RuntimeException {
     public Message responseMessage;

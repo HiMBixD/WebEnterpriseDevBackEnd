@@ -1,6 +1,6 @@
 package group2.wed.utils;
 
-import group2.wed.controllers.other.Message;
+import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.response.AppResponse;
 import group2.wed.controllers.um.response.AppResponseFailure;
 import org.springframework.http.HttpStatus;

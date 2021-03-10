@@ -1,14 +1,13 @@
 package group2.wed.controllers.um;
 
 import group2.wed.constant.AppConstants;
-import group2.wed.controllers.other.AppResponseException;
-import group2.wed.controllers.other.Message;
+import group2.wed.controllers.otherComponent.AppResponseException;
+import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.request.GetUserInfoRequest;
 import group2.wed.controllers.um.request.UpdateUserInfoRequest;
 import group2.wed.controllers.um.response.AppResponse;
 import group2.wed.controllers.um.response.AppResponseFailure;
 import group2.wed.controllers.um.response.AppResponseSuccess;
-import group2.wed.entities.User;
 import group2.wed.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;

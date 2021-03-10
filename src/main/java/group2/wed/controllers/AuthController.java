@@ -2,7 +2,7 @@ package group2.wed.controllers;
 
 import group2.wed.authen.JwtProvider;
 import group2.wed.constant.AppConstants;
-import group2.wed.controllers.other.Message;
+import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.request.LoginRequest;
 import group2.wed.controllers.um.response.AppResponse;
 import group2.wed.controllers.um.response.AppResponseFailure;
