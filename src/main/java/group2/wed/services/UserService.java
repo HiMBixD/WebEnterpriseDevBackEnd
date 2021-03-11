@@ -7,14 +7,17 @@ import group2.wed.controllers.um.request.CreateUserRequest;
 import group2.wed.controllers.um.request.GetUserInfoRequest;
 import group2.wed.controllers.um.request.SearchUserRequest;
 import group2.wed.controllers.um.request.UpdateUserInfoRequest;
+import group2.wed.entities.Faculty;
 import group2.wed.entities.RoleEntity;
 import group2.wed.entities.User;
 import group2.wed.entities.dto.UserDTO;
+import group2.wed.repository.FacultyRepository;
 import group2.wed.repository.RoleRepository;
 import group2.wed.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +32,9 @@ public class UserService {
     private RoleRepository roleRepository;
 
     @Autowired
+    private FacultyRepository facultyRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     public Optional<User> findByUsername(String username) {
@@ -37,9 +43,30 @@ public class UserService {
 
     public UserDTO createUser(CreateUserRequest request) {
         try {
+            if (StringUtils.isEmpty(request.getUsername())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "username"));
+            }
+            if (StringUtils.isEmpty(request.getPassword())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "password"));
+            }
+            if (StringUtils.isEmpty(request.getRoleId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "roleId"));
+            }
+            if (StringUtils.isEmpty(request.getEmail())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "email"));
+            }
+            if (StringUtils.isEmpty(request.getFacultyId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "facultyId"));
+            }
+
             Optional<RoleEntity> optional = roleRepository.findByRoleId(request.getRoleId());
             if (!optional.isPresent()) {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "RoleId"));
+            }
+            Optional<Faculty> optionalFaculty = facultyRepository.findFaById(request.getFacultyId());
+
+            if (!optionalFaculty.isPresent()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "FacultyId"));
             }
             if (findByUsername(request.getUsername()).isPresent()) {
                 throw new AppResponseException(new Message(AppConstants.EXISTED, "Username"));
@@ -47,6 +74,11 @@ public class UserService {
             User user = new User();
             user.setUsername(request.getUsername());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
+            user.setFirstName(request.getFirstName());
+            user.setLastName(request.getLastName());
+            user.setPhone(request.getPhone());
+            user.setEmail(request.getEmail());
+            user.setFacultyId(optionalFaculty.get().getFacultyId());
             user.setRoleEntity(optional.get());
             userRepository.save(user);
             return new UserDTO(user);
@@ -91,6 +123,7 @@ public class UserService {
             User user = optionalUser.get();
             if (allowRoleChange) {
                 user.setEmail(request.getEmail());
+                user.setFacultyId(request.getFacultyId());
             }
             user.setPhone(request.getPhone());
             user.setLastName(request.getLastName());

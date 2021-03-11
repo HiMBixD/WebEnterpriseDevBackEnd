@@ -14,4 +14,5 @@ public class UpdateUserInfoRequest {
     private String phone;
     private String email;
     private Long roleId;
+    private Long facultyId;
 }

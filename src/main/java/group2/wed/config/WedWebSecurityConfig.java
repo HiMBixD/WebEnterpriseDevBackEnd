@@ -29,7 +29,8 @@ public class WedWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/admin/*").hasRole("ADMIN")
-                .antMatchers("/user/*").hasAnyRole("ADMIN", "MANAGER", "COORDINATOR", "STUDENT", "GUEST")
+                .antMatchers("/student").hasRole("STUDENT")
+                .antMatchers("/user/*", "/").hasAnyRole("ADMIN", "MANAGER", "COORDINATOR", "STUDENT", "GUEST")
                 .antMatchers("/home", "/auth").permitAll()
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

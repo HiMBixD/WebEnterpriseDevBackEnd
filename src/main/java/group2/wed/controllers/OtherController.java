@@ -5,6 +5,7 @@ import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.AdminController;
 import group2.wed.controllers.um.request.CreateAssignmentRequest;
+import group2.wed.controllers.um.request.PostSubmissionRequest;
 import group2.wed.controllers.um.response.AppResponse;
 import group2.wed.controllers.um.response.AppResponseFailure;
 import group2.wed.controllers.um.response.AppResponseSuccess;
@@ -31,8 +32,7 @@ public class OtherController {
     @PostMapping("/create-assignment")
     public AppResponse createAssignment(@RequestBody CreateAssignmentRequest request) {
         try {
-            commonServices.createAssignment(request);
-            return new AppResponseSuccess();
+            return new AppResponseSuccess(commonServices.createAssignment(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
         }
@@ -42,6 +42,15 @@ public class OtherController {
     public AppResponse getFaculties() {
         try {
             return new AppResponseSuccess(commonServices.getAllFaculty());
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
+    @PostMapping("/student/post-submission")
+    public AppResponse postSubmission(@RequestBody PostSubmissionRequest request) {
+        try {
+            return new AppResponseSuccess(commonServices.postSubmission(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
         }

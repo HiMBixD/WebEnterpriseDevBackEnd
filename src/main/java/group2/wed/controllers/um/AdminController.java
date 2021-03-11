@@ -3,6 +3,7 @@ package group2.wed.controllers.um;
 import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.um.request.CreateUserRequest;
 import group2.wed.controllers.um.request.SearchUserRequest;
+import group2.wed.controllers.um.request.SetClosureDateRequest;
 import group2.wed.controllers.um.request.UpdateUserInfoRequest;
 import group2.wed.controllers.um.response.AppResponse;
 import group2.wed.controllers.um.response.AppResponseFailure;
@@ -48,6 +49,15 @@ public class AdminController {
     public AppResponse getUsersInfo(@RequestBody SearchUserRequest request) {
         try {
             return new AppResponseSuccess(userService.searchUsersInfo(request));
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
+    @PostMapping("/set-closure")
+    public AppResponse setClosureDate(@RequestBody SetClosureDateRequest request) {
+        try {
+            return new AppResponseSuccess(commonServices.setClosureDate(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
         }

@@ -23,8 +23,8 @@ public class Assignment {
     @Column(name = "CREATE_BY", length = 6, nullable = false)
     private String create_by;
 
-    @Column(name = "ACADEMIC_YEAR", nullable = false)
-    private Integer year;
+    @Column(name = "deadline_id", nullable = false)
+    private Integer deadlineId;
 
     @Column(name = "FACULTY_ID", nullable = false)
     private Long facultyId;

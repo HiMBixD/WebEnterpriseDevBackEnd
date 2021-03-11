@@ -30,6 +30,9 @@ public class User {
     @Column(name = "EMAIL", length = 200)
     private String email;
 
+    @Column(name = "FACULTY_ID")
+    private Long facultyId;
+
     @ManyToOne
     @JoinColumn(name = "ROLE_ID")
     private RoleEntity roleEntity;

@@ -4,14 +4,11 @@ import group2.wed.constant.AppConstants;
 import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.request.CreateAssignmentRequest;
-import group2.wed.entities.Assignment;
-import group2.wed.entities.Faculty;
-import group2.wed.entities.RoleEntity;
-import group2.wed.entities.User;
+import group2.wed.controllers.um.request.PostSubmissionRequest;
+import group2.wed.controllers.um.request.SetClosureDateRequest;
+import group2.wed.entities.*;
 import group2.wed.entities.dto.UserDTO;
-import group2.wed.repository.AssignmentRepository;
-import group2.wed.repository.FacultyRepository;
-import group2.wed.repository.RoleRepository;
+import group2.wed.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,12 +16,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CommonServices {
+
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private DeadlineRepository deadlineRepository;
+
+    @Autowired
+    private SubmissionRepository submissionRepository;
 
     @Autowired
     private FacultyRepository facultyRepository;
@@ -36,7 +43,7 @@ public class CommonServices {
         return this.facultyRepository.findAll();
     }
 
-    public boolean createAssignment(CreateAssignmentRequest request) {
+    public Assignment createAssignment(CreateAssignmentRequest request) {
         try {
             if (StringUtils.isEmpty(request.getAssignName())) {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "assignName"));
@@ -48,10 +55,64 @@ public class CommonServices {
             Assignment assignment = new Assignment();
             assignment.setAssignmentName(request.getAssignName());
             assignment.setCreate_by(userDetails.getUsername());
-            assignment.setYear(LocalDate.now().getYear());
+            assignment.setDeadlineId(LocalDate.now().getYear());
             assignment.setFacultyId(request.getFacultyId());
             assignmentRepository.save(assignment);
-            return true;
+            return assignment;
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    public Date setClosureDate(SetClosureDateRequest request) {
+        try {
+            if (StringUtils.isEmpty(request.getYear())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "year"));
+            }
+            if (StringUtils.isEmpty(request.getClosureDate())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "closureDate"));
+            }
+//            UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+            Deadline deadline = new Deadline();
+            deadline.setYear(Long.parseLong(request.getYear()));
+            deadline.setClosureDate(request.getClosureDate());
+            deadlineRepository.save(deadline);
+            return deadline.getClosureDate();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    public Submission postSubmission(PostSubmissionRequest request) {
+        try {
+            if (StringUtils.isEmpty(request.getAssignmentId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "assignmentId"));
+            }
+            Optional<Assignment> optionalAssignment = assignmentRepository.findAssignmentById(request.getAssignmentId());
+            if (optionalAssignment.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "assignmentId"));
+            }
+            Optional<Deadline> optionalDeadline = deadlineRepository.findDeadlineById(Long.valueOf(optionalAssignment.get().getDeadlineId()));
+            Date now = new Date();
+            if (optionalDeadline.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "deadlineId"));
+
+            }
+            if (now.after(optionalDeadline.get().getClosureDate())) {
+                throw new AppResponseException(new Message(AppConstants.INVALID, "This assignment is overdue"));
+            }
+            if (StringUtils.isEmpty(request.getAssignmentId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "assignmentId"));
+            }
+            UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+            Submission submission = new Submission();
+//            submission.setYear(Long.parseLong(request.getYear()));
+            submission.setAssignmentId(request.getAssignmentId());
+            submission.setUsername(userDetails.getUsername());
+            submission.setSubmissionDate(new Date());
+            submission.setStatus(1);
+            submissionRepository.save(submission);
+            return submission;
         }catch (Exception e){
             throw e;
         }
