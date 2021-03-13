@@ -101,9 +101,7 @@ public class UserService {
 
     public List<UserDTO> searchUsersInfo(SearchUserRequest request) {
         try {
-            System.out.println("username"+request.getUsername());
             List<User> users = userRepository.searchByUsername(request.getUsername());
-            System.out.println("list"+users);
             return users.stream().map(UserDTO::new).collect(Collectors.toList());
         }catch (Exception e){
             throw e;

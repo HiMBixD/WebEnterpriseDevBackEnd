@@ -3,9 +3,7 @@ package group2.wed.services;
 import group2.wed.constant.AppConstants;
 import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.otherComponent.Message;
-import group2.wed.controllers.um.request.CreateAssignmentRequest;
-import group2.wed.controllers.um.request.PostSubmissionRequest;
-import group2.wed.controllers.um.request.SetClosureDateRequest;
+import group2.wed.controllers.um.request.*;
 import group2.wed.entities.*;
 import group2.wed.entities.dto.UserDTO;
 import group2.wed.repository.*;
@@ -88,7 +86,53 @@ public class CommonServices {
             if (StringUtils.isEmpty(request.getAssignmentId())) {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "assignmentId"));
             }
-            Optional<Assignment> optionalAssignment = assignmentRepository.findAssignmentById(request.getAssignmentId());
+            checkValidClosure(request.getAssignmentId());
+            UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+            Submission submission = new Submission();
+//            submission.setYear(Long.parseLong(request.getYear()));
+            submission.setAssignmentId(request.getAssignmentId());
+            submission.setUsername(userDetails.getUsername());
+            submission.setSubmissionDate(new Date());
+            submissionRepository.save(submission);
+            return submission;
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    public Submission selectSubmission(SelectSubmissionRequest request) {
+        try {
+            if (StringUtils.isEmpty(request.getSubmissionId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "submissionId"));
+            }
+            Optional<Submission> optionalSubmission = submissionRepository.findById(request.getSubmissionId());
+            if (optionalSubmission.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "submissionId"));
+            }
+            checkValidClosure(optionalSubmission.get().getAssignmentId());
+            Submission submission = optionalSubmission.get();
+            submission.setStatus(1);
+            submissionRepository.save(submission);
+            return submission;
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    public List<Submission> searchSubmissions(SearchSubmissionRequest request) {
+        try {
+            List<Submission> list = submissionRepository.searchByUsernameOrStatus(request.getUsername(), request.getStatus());
+            return list;
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+
+    // common functions
+    public void checkValidClosure(Long assignmentId) {
+        try {
+            Optional<Assignment> optionalAssignment = assignmentRepository.findAssignmentById(assignmentId);
             if (optionalAssignment.isEmpty()) {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "assignmentId"));
             }
@@ -101,18 +145,6 @@ public class CommonServices {
             if (now.after(optionalDeadline.get().getClosureDate())) {
                 throw new AppResponseException(new Message(AppConstants.INVALID, "This assignment is overdue"));
             }
-            if (StringUtils.isEmpty(request.getAssignmentId())) {
-                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "assignmentId"));
-            }
-            UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-            Submission submission = new Submission();
-//            submission.setYear(Long.parseLong(request.getYear()));
-            submission.setAssignmentId(request.getAssignmentId());
-            submission.setUsername(userDetails.getUsername());
-            submission.setSubmissionDate(new Date());
-            submission.setStatus(1);
-            submissionRepository.save(submission);
-            return submission;
         }catch (Exception e){
             throw e;
         }
