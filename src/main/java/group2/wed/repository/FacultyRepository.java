@@ -1,7 +1,6 @@
 package group2.wed.repository;
 
 import group2.wed.entities.Faculty;
-import group2.wed.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

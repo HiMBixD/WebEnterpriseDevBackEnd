@@ -1,6 +1,5 @@
 package group2.wed.repository;
 
-import group2.wed.entities.Assignment;
 import group2.wed.entities.Deadline;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
