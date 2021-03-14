@@ -41,6 +41,15 @@ public class CommonServices {
         return this.facultyRepository.findAll();
     }
 
+    public List<Assignment> searchAssignment(SearchAssignmentRequest request) {
+        try {
+            List<Assignment> list = assignmentRepository.searchAssignmentByFaOrYear(request.getFacultyId(), request.getYear());
+            return list;
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
     public Assignment createAssignment(CreateAssignmentRequest request) {
         try {
             if (StringUtils.isEmpty(request.getAssignName())) {
@@ -48,6 +57,10 @@ public class CommonServices {
             }
             if (StringUtils.isEmpty(request.getFacultyId())) {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "facultyId"));
+            }
+            Optional<Assignment> optional = assignmentRepository.findAssignmentByName(request.getAssignName());
+            if (optional.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.DUPLICATE, "assignName"));
             }
             UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             Assignment assignment = new Assignment();

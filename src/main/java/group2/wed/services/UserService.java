@@ -3,10 +3,7 @@ package group2.wed.services;
 import group2.wed.constant.AppConstants;
 import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.otherComponent.Message;
-import group2.wed.controllers.um.request.CreateUserRequest;
-import group2.wed.controllers.um.request.GetUserInfoRequest;
-import group2.wed.controllers.um.request.SearchUserRequest;
-import group2.wed.controllers.um.request.UpdateUserInfoRequest;
+import group2.wed.controllers.um.request.*;
 import group2.wed.entities.Faculty;
 import group2.wed.entities.RoleEntity;
 import group2.wed.entities.User;
@@ -103,6 +100,32 @@ public class UserService {
         try {
             List<User> users = userRepository.searchByUsername(request.getUsername());
             return users.stream().map(UserDTO::new).collect(Collectors.toList());
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    public void changePass(ChangePassRequest request) {
+        try {
+            if (request.getUsername().isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "Username"));
+            }
+            if (request.getOldPassword().isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "oldPassword"));
+            }
+            if (request.getNewPassword().isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "newPassword"));
+            }
+            Optional<User> optionalUser = findByUsername(request.getUsername());
+            if (optionalUser.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "Username"));
+            }
+            if (!passwordEncoder.matches(request.getOldPassword(), optionalUser.get().getPassword())) {
+                throw new AppResponseException(new Message(AppConstants.INVALID, "oldPassword"));
+            }
+            User user = optionalUser.get();
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            userRepository.save(user);
         }catch (Exception e){
             throw e;
         }

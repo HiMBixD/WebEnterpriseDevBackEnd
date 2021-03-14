@@ -3,6 +3,7 @@ package group2.wed.controllers.um;
 import group2.wed.constant.AppConstants;
 import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.otherComponent.Message;
+import group2.wed.controllers.um.request.ChangePassRequest;
 import group2.wed.controllers.um.request.GetUserInfoRequest;
 import group2.wed.controllers.um.request.UpdateUserInfoRequest;
 import group2.wed.controllers.um.response.AppResponse;
@@ -41,6 +42,20 @@ public class UserCommonController {
                 throw new AppResponseException(new Message(AppConstants.INVALID, "username"));
             }
             return new AppResponseSuccess(userService.updateUserInfo(request, false));
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
+    @PostMapping("/change-password")
+    public AppResponse changePass(@RequestBody ChangePassRequest request) {
+        try {
+            UserDetails user = (UserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (!user.getUsername().equals(request.getUsername())) {
+                throw new AppResponseException(new Message(AppConstants.INVALID, "username"));
+            }
+            userService.changePass(request);
+            return new AppResponseSuccess();
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
         }
