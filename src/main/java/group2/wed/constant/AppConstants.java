@@ -12,6 +12,7 @@ public class AppConstants {
     public static final String NOT_ALLOWED = "NOT_ALLOWED";
 
     public static final String NOT_FOUND = "NOT_FOUND";
+    public static final String DUPLICATE = "DUPLICATE";
     public static final String INVALID = "INVALID";
     public static final String EXISTED = "EXISTED";
 }

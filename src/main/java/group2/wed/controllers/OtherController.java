@@ -4,10 +4,7 @@ import group2.wed.constant.AppConstants;
 import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.AdminController;
-import group2.wed.controllers.um.request.CreateAssignmentRequest;
-import group2.wed.controllers.um.request.PostSubmissionRequest;
-import group2.wed.controllers.um.request.SearchSubmissionRequest;
-import group2.wed.controllers.um.request.SelectSubmissionRequest;
+import group2.wed.controllers.um.request.*;
 import group2.wed.controllers.um.response.AppResponse;
 import group2.wed.controllers.um.response.AppResponseFailure;
 import group2.wed.controllers.um.response.AppResponseSuccess;
@@ -33,6 +30,15 @@ public class OtherController {
     public AppResponse createAssignment(@RequestBody CreateAssignmentRequest request) {
         try {
             return new AppResponseSuccess(commonServices.createAssignment(request));
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
+    @PostMapping("search-assignment")
+    public AppResponse searchAssignment(@RequestBody SearchAssignmentRequest request) {
+        try {
+            return new AppResponseSuccess(commonServices.searchAssignment(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
         }
