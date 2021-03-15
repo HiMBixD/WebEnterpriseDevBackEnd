@@ -28,10 +28,10 @@ public class WedWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
+                .antMatchers("/auth").permitAll()
                 .antMatchers("/admin/*").hasRole("ADMIN")
                 .antMatchers("/student").hasRole("STUDENT")
-                .antMatchers("/user/*", "/").hasAnyRole("ADMIN", "MANAGER", "COORDINATOR", "STUDENT", "GUEST")
-                .antMatchers("/home", "/auth").permitAll()
+                .antMatchers("/user/*", "/*").hasAnyRole("ADMIN", "MANAGER", "COORDINATOR", "STUDENT", "GUEST")
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }

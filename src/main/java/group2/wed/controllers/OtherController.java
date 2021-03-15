@@ -53,6 +53,15 @@ public class OtherController {
         }
     }
 
+    @PostMapping("get-Roles")
+    public AppResponse getRoles() {
+        try {
+            return new AppResponseSuccess(commonServices.getAllRoles());
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
     @PostMapping("student/post-submission")
     public AppResponse postSubmission(@RequestBody PostSubmissionRequest request) {
         try {
@@ -75,6 +84,25 @@ public class OtherController {
     public AppResponse searchSubmission(@RequestBody SearchSubmissionRequest request) {
         try {
             return new AppResponseSuccess(commonServices.searchSubmissions(request));
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
+    @PostMapping("add-comment")
+    public AppResponse addComment(@RequestBody AddCommentRequest request) {
+        try {
+            commonServices.addComment(request);
+            return new AppResponseSuccess();
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
+    @PostMapping("get-comment")
+    public AppResponse getCommentBySubmission(@RequestBody GetCommentRequest request) {
+        try {
+            return new AppResponseSuccess(commonServices.getComments(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
         }

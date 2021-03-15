@@ -8,11 +8,15 @@ import group2.wed.entities.*;
 import group2.wed.entities.dto.UserDTO;
 import group2.wed.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -21,6 +25,8 @@ import java.util.Optional;
 
 @Service
 public class CommonServices {
+    @Autowired
+    public JavaMailSender emailSender;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -35,10 +41,17 @@ public class CommonServices {
     private FacultyRepository facultyRepository;
 
     @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
     private AssignmentRepository assignmentRepository;
 
     public List<Faculty> getAllFaculty() {
         return this.facultyRepository.findAll();
+    }
+
+    public List<RoleEntity> getAllRoles() {
+        return roleRepository.findAll();
     }
 
     public List<Assignment> searchAssignment(SearchAssignmentRequest request) {
@@ -59,7 +72,7 @@ public class CommonServices {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "facultyId"));
             }
             Optional<Assignment> optional = assignmentRepository.findAssignmentByName(request.getAssignName());
-            if (optional.isEmpty()) {
+            if (optional.isPresent()) {
                 throw new AppResponseException(new Message(AppConstants.DUPLICATE, "assignName"));
             }
             UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
@@ -141,6 +154,41 @@ public class CommonServices {
         }
     }
 
+    public void addComment(AddCommentRequest request) {
+        try {
+            if (StringUtils.isEmpty(request.getSubmissionId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "submissionId"));
+            }
+            if (StringUtils.isEmpty(request.getContent())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "content"));
+            }
+            Optional<Submission> optionalSubmission = submissionRepository.findById(request.getSubmissionId().intValue());
+            if (optionalSubmission.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "submissionId"));
+            }
+            UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+            Comment comment = new Comment();
+            comment.setContent(request.getContent());
+            comment.setSubmissionId(request.getSubmissionId().intValue());
+            comment.setUsername(userDetails.getUsername());
+            comment.setCreateDate(new Date());
+            commentRepository.save(comment);
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    public List<Comment> getComments(GetCommentRequest request) {
+        try {
+            if (StringUtils.isEmpty(request.getSubmissionId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "submissionId"));
+            }
+            List<Comment> list = commentRepository.getAllBySubmissionId(request.getSubmissionId().intValue());
+            return list;
+        }catch (Exception e){
+            throw e;
+        }
+    }
 
     // common functions
     public void checkValidClosure(Long assignmentId) {
@@ -161,5 +209,15 @@ public class CommonServices {
         }catch (Exception e){
             throw e;
         }
+    }
+
+    public void sendEmail(String directEmail, String content, String header) throws MessagingException {
+        MimeMessage message = emailSender.createMimeMessage();
+        boolean multipart = true;
+        MimeMessageHelper helper = new MimeMessageHelper(message, multipart, "utf-8");
+        message.setContent(content, "text/html");
+        helper.setTo(directEmail);
+        helper.setSubject(header);
+        this.emailSender.send(message);
     }
 }
