@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateAssignmentRequest {
-    private String assignName;
-    private String description;
-    private Long facultyId;
+public class GetFilesRequest {
+    private Long submissionId;
 }

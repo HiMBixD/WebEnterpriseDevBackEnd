@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 public class AdminController {
     private static final Logger LOG = LoggerFactory.getLogger(AdminController.class);
     @Autowired

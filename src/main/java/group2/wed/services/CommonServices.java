@@ -78,6 +78,7 @@ public class CommonServices {
             UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             Assignment assignment = new Assignment();
             assignment.setAssignmentName(request.getAssignName());
+            assignment.setDescription(request.getDescription());
             assignment.setCreate_by(userDetails.getUsername());
             assignment.setDeadlineId(LocalDate.now().getYear());
             assignment.setFacultyId(request.getFacultyId());
