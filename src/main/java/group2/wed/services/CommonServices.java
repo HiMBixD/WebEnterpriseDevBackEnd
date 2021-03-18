@@ -191,6 +191,21 @@ public class CommonServices {
         }
     }
 
+    public Deadline getDeadLine(GetDeadLineRequest request) {
+        try {
+            if (StringUtils.isEmpty(request.getYear())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "year"));
+            }
+            Optional<Deadline> optionalDeadline = deadlineRepository.findDeadlineById(request.getYear());
+            if (optionalDeadline.isEmpty()){
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "year"));
+            }
+            return optionalDeadline.get();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
     // common functions
     public void checkValidClosure(Long assignmentId) {
         try {
