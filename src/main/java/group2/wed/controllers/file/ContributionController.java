@@ -36,9 +36,8 @@ public class ContributionController {
     public AppResponse uploadFile(UploadFileRequest request) {
         Message message = new Message();
         try {
-            message.setMessage("Uploaded the file successfully: " + request.getFile().getOriginalFilename());
-            filesService.save(request);
-            return new AppResponseSuccess(message);
+            message.setMessage("Uploaded the file successfully");
+            return new AppResponseSuccess(filesService.save(request), message);
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
         } catch (IOException exception) {

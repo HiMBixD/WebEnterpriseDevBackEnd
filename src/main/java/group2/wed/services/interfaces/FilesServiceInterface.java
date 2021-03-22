@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 public interface FilesServiceInterface {
     public void init();
 
-    public void save(UploadFileRequest request) throws IOException;
+    public File save(UploadFileRequest request) throws IOException;
     public List<File> getListFiles(GetFilesRequest request);
     public Resource load(Integer fileId);
 

@@ -58,7 +58,7 @@ public class FilesService implements FilesServiceInterface {
     }
 
     @Override
-    public void save(UploadFileRequest request) throws IOException {
+    public File save(UploadFileRequest request) throws IOException {
         try {
             if (StringUtils.isEmpty(request.getSubmissionId())) {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "submissionId"));
@@ -88,6 +88,7 @@ public class FilesService implements FilesServiceInterface {
             fileSave.setSubmissionId(request.getSubmissionId().intValue());
             fileSave.setUsername(userDetails.getUsername());
             fileRepository.save(fileSave);
+            return fileSave;
         } catch (Exception e){
             throw e;
         }
