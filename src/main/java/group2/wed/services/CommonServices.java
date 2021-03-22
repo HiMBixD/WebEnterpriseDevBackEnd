@@ -148,7 +148,7 @@ public class CommonServices {
 
     public List<Submission> searchSubmissions(SearchSubmissionRequest request) {
         try {
-            List<Submission> list = submissionRepository.searchByUsernameOrStatus(request.getUsername(), request.getStatus());
+            List<Submission> list = submissionRepository.searchByUsernameOrStatusOrAssignmentId(request.getUsername(), request.getStatus(), request.getAssignmentId());
             return list;
         }catch (Exception e){
             throw e;

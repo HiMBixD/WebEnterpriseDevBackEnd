@@ -59,7 +59,6 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     public AppResponse resetPassword(@RequestBody ResetPasswordRequest request) {
-        Message message = new Message();
         try {
             if (StringUtils.isEmpty(request.getUsername())) {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "username"));
@@ -79,12 +78,18 @@ public class AuthController {
             user.setPassword(passwordEncoder.encode(newPass));
             userRepository.save(user);
 //            userService.resetPass(newPass, optionalUser.get().getUsername());
-            String mailContent = "Your password from WED has been reset to" + newPass;
-            String mailHeader = "Reset Password";
+            String mailContent = "<p>Dear Mr/Mrs <strong>" + optionalUser.get().getUsername() + "</strong>,</p>" +
+                    "<p>Your password has been reset, your new password is: <strong>" + newPass + "</strong></p>" +
+                    "<p>Thank you for using our service,</p>" +
+                    "<p>Please login to WED web to confirm your account information</p>" +
+                    "<p>Best regards.</p>";
+            String mailHeader = "Reset new Password for WED system login";
             commonServices.sendEmail(optionalUser.get().getEmail(), mailContent, mailHeader);
             return new AppResponseSuccess();
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
         } catch (Exception e) {
-            return new AppResponseFailure(message);
+            return new AppResponseFailure(e.getMessage());
         }
     }
 

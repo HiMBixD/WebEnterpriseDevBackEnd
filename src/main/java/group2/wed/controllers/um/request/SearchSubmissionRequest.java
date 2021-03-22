@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SearchSubmissionRequest {
     private String username;
+    private Long assignmentId;
     private Integer status;
 }

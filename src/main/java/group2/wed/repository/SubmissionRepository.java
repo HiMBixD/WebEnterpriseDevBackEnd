@@ -12,6 +12,9 @@ public interface SubmissionRepository extends JpaRepository<Submission, Integer>
     @Query("from Submission s where s.submissionId = :submissionId")
     Optional<Submission> findSubmissionById(@Param("submissionId")Long submissionId);
 
-    @Query("FROM Submission s WHERE s.username LIKE CONCAT('%',:username,'%') and (:status is null or s.status = :status)")
-    List<Submission> searchByUsernameOrStatus(@Param("username")String username, @Param("status")Integer status);
+    @Query("FROM Submission s WHERE s.username LIKE CONCAT('%',:username,'%') and " +
+            "(:status is null or s.status = :status) and (:assignmentId is null or s.assignmentId = :assignmentId)")
+    List<Submission> searchByUsernameOrStatusOrAssignmentId(@Param("username")String username,
+                                                            @Param("status")Integer status,
+                                                            @Param("assignmentId")Long assignmentId);
 }
