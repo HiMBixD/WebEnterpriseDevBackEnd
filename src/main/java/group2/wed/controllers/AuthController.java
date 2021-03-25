@@ -78,7 +78,7 @@ public class AuthController {
             user.setPassword(passwordEncoder.encode(newPass));
             userRepository.save(user);
 //            userService.resetPass(newPass, optionalUser.get().getUsername());
-            String mailContent = "<p>Dear Mr/Mrs <strong>" + optionalUser.get().getUsername() + "</strong>,</p>" +
+            String mailContent = "<p>Dear Mr/Mrs <strong>" + optionalUser.get().getFirstName() + "</strong>,</p>" +
                     "<p>Your password has been reset, your new password is: <strong>" + newPass + "</strong></p>" +
                     "<p>Thank you for using our service,</p>" +
                     "<p>Please login to WED web to confirm your account information</p>" +

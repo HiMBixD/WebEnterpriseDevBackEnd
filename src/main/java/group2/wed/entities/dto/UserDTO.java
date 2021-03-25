@@ -22,6 +22,8 @@ public class UserDTO {
 
     private String email;
 
+    private Long facultyId;
+
     private RoleDTO role;
 
     public UserDTO(User user) {
@@ -30,6 +32,7 @@ public class UserDTO {
         this.lastName = user.getLastName();
         this.phone = user.getPhone();
         this.email = user.getEmail();
+        this.facultyId = user.getFacultyId();
         this.role = new RoleDTO(user.getRoleEntity());
     }
 }

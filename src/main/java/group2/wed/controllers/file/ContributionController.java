@@ -33,7 +33,7 @@ public class ContributionController {
     FilesService filesService;
 
     @PostMapping("/upload")
-    public AppResponse uploadFile(UploadFileRequest request) {
+    public AppResponse uploadFile(UploadFileRequest request) throws Exception {
         Message message = new Message();
         try {
             message.setMessage("Uploaded the file successfully");

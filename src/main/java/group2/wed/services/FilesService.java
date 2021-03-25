@@ -58,7 +58,7 @@ public class FilesService implements FilesServiceInterface {
     }
 
     @Override
-    public File save(UploadFileRequest request) throws IOException {
+    public File save(UploadFileRequest request) throws Exception {
         try {
             if (StringUtils.isEmpty(request.getSubmissionId())) {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "submissionId"));
