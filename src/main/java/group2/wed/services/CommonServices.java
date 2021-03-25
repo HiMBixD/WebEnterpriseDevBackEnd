@@ -46,6 +46,9 @@ public class CommonServices {
     @Autowired
     private AssignmentRepository assignmentRepository;
 
+    @Autowired
+    private UserService userService;
+
     public List<Faculty> getAllFaculty() {
         return this.facultyRepository.findAll();
     }
@@ -108,12 +111,16 @@ public class CommonServices {
         }
     }
 
-    public Submission postSubmission(PostSubmissionRequest request) {
+    public Submission postSubmission(PostSubmissionRequest request) throws Exception {
         try {
             if (StringUtils.isEmpty(request.getAssignmentId())) {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "assignmentId"));
             }
-            checkValidClosure(request.getAssignmentId());
+            Assignment assignment = checkValidClosure(request.getAssignmentId());
+            Optional<User> teacherOptional = userService.findByUsername(assignment.getCreate_by());
+            if (teacherOptional.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "Assignment's Owner"));
+            }
             UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             Submission submission = new Submission();
 //            submission.setYear(Long.parseLong(request.getYear()));
@@ -121,6 +128,11 @@ public class CommonServices {
             submission.setUsername(userDetails.getUsername());
             submission.setSubmissionDate(new Date());
             submissionRepository.save(submission);
+            String mailContent = "<p><span style=\"font-size:14px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\"><strong>Dear Mr/Mrs "+teacherOptional.get().getFirstName()+"</strong>,</span></span></span></p>" +
+                    "<p><span style=\"font-size:14px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">There is an update to your assignment in <strong>"+assignment.getAssignmentName()+"</strong> by <strong>"+userDetails.getUsername()+"</strong>. Please provide a response in </span><span style=\"color:#c0392b\"><strong>14</strong></span><span style=\"color:#000000\"> days.</span></span></span></p>" +
+                    "<p><span style=\"font-size:14px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">Best regards,</span></span></span></p>\n";
+            String mailHeader = "New Submission on your Assignment";
+            sendEmail(teacherOptional.get().getEmail(),mailContent,mailHeader);
             return submission;
         }catch (Exception e){
             throw e;
@@ -207,7 +219,7 @@ public class CommonServices {
     }
 
     // common functions
-    public void checkValidClosure(Long assignmentId) {
+    public Assignment checkValidClosure(Long assignmentId) {
         try {
             Optional<Assignment> optionalAssignment = assignmentRepository.findAssignmentById(assignmentId);
             if (optionalAssignment.isEmpty()) {
@@ -222,6 +234,7 @@ public class CommonServices {
             if (now.after(optionalDeadline.get().getClosureDate())) {
                 throw new AppResponseException(new Message(AppConstants.INVALID, "This assignment is overdue"));
             }
+            return optionalAssignment.get();
         }catch (Exception e){
             throw e;
         }

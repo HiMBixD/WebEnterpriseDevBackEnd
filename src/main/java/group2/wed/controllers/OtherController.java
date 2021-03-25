@@ -63,6 +63,8 @@ public class OtherController {
             return new AppResponseSuccess(commonServices.postSubmission(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
+        } catch (Exception e) {
+            return new AppResponseFailure(e.getMessage());
         }
     }
 
