@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SelectSubmissionRequest {
     private Integer submissionId;
+    private Integer status;
 }

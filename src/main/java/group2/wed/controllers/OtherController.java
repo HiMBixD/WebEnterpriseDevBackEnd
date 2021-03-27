@@ -74,6 +74,8 @@ public class OtherController {
             return new AppResponseSuccess(commonServices.selectSubmission(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
+        } catch (Exception e) {
+            return new AppResponseFailure(e.getMessage());
         }
     }
 

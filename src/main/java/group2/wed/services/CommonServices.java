@@ -126,6 +126,7 @@ public class CommonServices {
 //            submission.setYear(Long.parseLong(request.getYear()));
             submission.setAssignmentId(request.getAssignmentId());
             submission.setUsername(userDetails.getUsername());
+            submission.setStatus(0);
             submission.setSubmissionDate(new Date());
             submissionRepository.save(submission);
             String mailContent = "<p><span style=\"font-size:14px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\"><strong>Dear Mr/Mrs "+teacherOptional.get().getFirstName()+"</strong>,</span></span></span></p>" +
@@ -139,19 +140,35 @@ public class CommonServices {
         }
     }
 
-    public Submission selectSubmission(SelectSubmissionRequest request) {
+    public Submission selectSubmission(SelectSubmissionRequest request) throws Exception {
         try {
             if (StringUtils.isEmpty(request.getSubmissionId())) {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "submissionId"));
+            }
+            if (request.getStatus() != 1 && request.getStatus()!= 2) {
+                throw new AppResponseException(new Message(AppConstants.INVALID, "status must be 1 or 2"));
             }
             Optional<Submission> optionalSubmission = submissionRepository.findById(request.getSubmissionId());
             if (optionalSubmission.isEmpty()) {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "submissionId"));
             }
-            checkValidClosure(optionalSubmission.get().getAssignmentId());
+            Assignment assignment = checkValidClosure(optionalSubmission.get().getAssignmentId());
             Submission submission = optionalSubmission.get();
-            submission.setStatus(1);
+            submission.setStatus(request.getStatus());
+            // status = 0 = no action yet;
+            // status = 1 = selected;
+            // status = 2 = deny + need fix;
+            // status = 3 = has comment no selected
             submissionRepository.save(submission);
+            Optional<User> userOptional = userService.findByUsername(submission.getUsername());
+            if (userOptional.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "Submission owner"));
+            }
+            String mailContent = "<p><span style=\"font-size:14px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\"><strong>Dear Mr/Mrs "+userOptional.get().getFirstName()+"</strong>,</span></span></span></p>" +
+                    "<p><span style=\"font-size:14px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">Your submission for assignment: <strong>"+assignment.getAssignmentName()+"</strong> <span style=\"color:red\">has been selected</span>. Please login to get further information</span></span></span></p>" +
+                    "<p><span style=\"font-size:14px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">Best regards,</span></span></span></p>";
+            String mailHeader = "Your submission upload on WED website is selected";
+            sendEmail(userOptional.get().getEmail(), mailContent, mailHeader);
             return submission;
         }catch (Exception e){
             throw e;
@@ -179,7 +196,22 @@ public class CommonServices {
             if (optionalSubmission.isEmpty()) {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "submissionId"));
             }
+            Optional<Assignment> optionalAssignment =
+                    assignmentRepository.findAssignmentById(optionalSubmission.get().getAssignmentId());
+            if (optionalAssignment.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "Assigment"));
+            }
             UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+            if (optionalAssignment.get().getCreate_by().equals(userDetails.getUsername())) {
+                Submission submission = optionalSubmission.get();
+                if (submission.getStatus() == 0) {
+                    submission.setStatus(3);
+                    submissionRepository.save(submission);
+                }
+            } else if (!optionalSubmission.get().getUsername().equals(userDetails.getUsername())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_ALLOWED, "You are not owner of this assigment or submission"));
+            }
+
             Comment comment = new Comment();
             comment.setContent(request.getContent());
             comment.setSubmissionId(request.getSubmissionId().intValue());
