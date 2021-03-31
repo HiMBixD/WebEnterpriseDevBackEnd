@@ -54,18 +54,8 @@ public class UserService {
             }
 
             Optional<RoleEntity> optional = roleRepository.findByRoleId(request.getRoleId());
-            if (!optional.isPresent()) {
+            if (optional.isEmpty()) {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "RoleId"));
-            }
-            if (optional.get().getRoleId() != 0 && optional.get().getRoleId() != 1) {
-                if (StringUtils.isEmpty(request.getFacultyId())) {
-                    throw new AppResponseException(new Message(AppConstants.NOT_NULL, "facultyId"));
-                }
-            }
-            Optional<Faculty> optionalFaculty = facultyRepository.findFaById(request.getFacultyId());
-
-            if (!optionalFaculty.isPresent()) {
-                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "FacultyId"));
             }
             if (findByUsername(request.getUsername()).isPresent()) {
                 throw new AppResponseException(new Message(AppConstants.EXISTED, "Username"));
@@ -77,8 +67,17 @@ public class UserService {
             user.setLastName(request.getLastName());
             user.setPhone(request.getPhone());
             user.setEmail(request.getEmail());
-            user.setFacultyId(optionalFaculty.get().getFacultyId());
             user.setRoleEntity(optional.get());
+            if (optional.get().getRoleId() != 0 && optional.get().getRoleId() != 1) {
+                if (StringUtils.isEmpty(request.getFacultyId())) {
+                    throw new AppResponseException(new Message(AppConstants.NOT_NULL, "facultyId"));
+                }
+                Optional<Faculty> optionalFaculty = facultyRepository.findFaById(request.getFacultyId());
+                if (optionalFaculty.isEmpty()) {
+                    throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "FacultyId"));
+                }
+                user.setFacultyId(optionalFaculty.get().getFacultyId());
+            }
             userRepository.save(user);
             return new UserDTO(user);
         }catch (Exception e){
