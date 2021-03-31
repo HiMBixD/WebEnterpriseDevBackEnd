@@ -28,7 +28,7 @@ public class WedWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/admin/*").hasRole("ADMIN")
+                .antMatchers("/api/admin/*", "/api/file/admin/*").hasRole("ADMIN")
                 .antMatchers("/api/student/*").hasRole("STUDENT")
                 .antMatchers("/api/user/*", "/api/*", "/api/file/*").hasAnyRole("ADMIN", "MANAGER", "COORDINATOR", "STUDENT", "GUEST")
                 .antMatchers("/auth").permitAll()

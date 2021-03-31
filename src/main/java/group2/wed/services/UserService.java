@@ -52,13 +52,15 @@ public class UserService {
             if (StringUtils.isEmpty(request.getEmail())) {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "email"));
             }
-            if (StringUtils.isEmpty(request.getFacultyId())) {
-                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "facultyId"));
-            }
 
             Optional<RoleEntity> optional = roleRepository.findByRoleId(request.getRoleId());
             if (!optional.isPresent()) {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "RoleId"));
+            }
+            if (optional.get().getRoleId() != 0 && optional.get().getRoleId() != 1) {
+                if (StringUtils.isEmpty(request.getFacultyId())) {
+                    throw new AppResponseException(new Message(AppConstants.NOT_NULL, "facultyId"));
+                }
             }
             Optional<Faculty> optionalFaculty = facultyRepository.findFaById(request.getFacultyId());
 

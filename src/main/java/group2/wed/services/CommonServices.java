@@ -59,7 +59,7 @@ public class CommonServices {
 
     public List<Assignment> searchAssignment(SearchAssignmentRequest request) {
         try {
-            List<Assignment> list = assignmentRepository.searchAssignmentByFaOrYear(request.getFacultyId(), request.getYear());
+            List<Assignment> list = assignmentRepository.searchAssignmentByFaOrYear(request.getFacultyId(), request.getDeadlineId());
             return list;
         }catch (Exception e){
             throw e;
@@ -74,16 +74,23 @@ public class CommonServices {
             if (StringUtils.isEmpty(request.getFacultyId())) {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "facultyId"));
             }
+            if (StringUtils.isEmpty(request.getDeadlineId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "deadlineId"));
+            }
             Optional<Assignment> optional = assignmentRepository.findAssignmentByName(request.getAssignName());
             if (optional.isPresent()) {
                 throw new AppResponseException(new Message(AppConstants.DUPLICATE, "assignName"));
+            }
+            Optional<Deadline> optionalDeadline = deadlineRepository.findById(request.getDeadlineId().intValue());
+            if (optionalDeadline.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "deadlineId"));
             }
             UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             Assignment assignment = new Assignment();
             assignment.setAssignmentName(request.getAssignName());
             assignment.setDescription(request.getDescription());
             assignment.setCreate_by(userDetails.getUsername());
-            assignment.setDeadlineId(LocalDate.now().getYear());
+            assignment.setDeadline(optionalDeadline.get());
             assignment.setFacultyId(request.getFacultyId());
             assignmentRepository.save(assignment);
             return assignment;
@@ -112,7 +119,7 @@ public class CommonServices {
                 if (StringUtils.isEmpty(request.getId())) {
                     throw new AppResponseException(new Message(AppConstants.NOT_NULL, "id"));
                 }
-                Optional<Deadline> optionalDeadline =  deadlineRepository.findDeadlineById(request.getId());
+                Optional<Deadline> optionalDeadline =  deadlineRepository.findById(request.getId().intValue());
                 if (optionalDeadline.isEmpty()) {
                     throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "id"));
                 }
@@ -255,14 +262,24 @@ public class CommonServices {
 
     public Deadline getDeadLine(GetDeadLineRequest request) {
         try {
-            if (StringUtils.isEmpty(request.getYear())) {
-                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "year"));
+            if (StringUtils.isEmpty(request.getDeadlineId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "deadlineId"));
             }
-            Optional<Deadline> optionalDeadline = deadlineRepository.findDeadlineById(request.getYear());
+            Optional<Deadline> optionalDeadline = deadlineRepository.findById(request.getDeadlineId());
             if (optionalDeadline.isEmpty()){
-                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "year"));
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "deadlineId"));
             }
             return optionalDeadline.get();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    public List<Deadline> getListDeadLine(GetListDeadLineRequest request) {
+        try {
+            List<Deadline> list = deadlineRepository.
+                    findAllByStartDateGreaterThanEqualAndEndDateLessThanEqual(request.getDate().getFrom(), request.getDate().getTo());
+            return list;
         }catch (Exception e){
             throw e;
         }
@@ -275,7 +292,7 @@ public class CommonServices {
             if (optionalAssignment.isEmpty()) {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "assignmentId"));
             }
-            Optional<Deadline> optionalDeadline = deadlineRepository.findDeadlineById(Long.valueOf(optionalAssignment.get().getDeadlineId()));
+            Optional<Deadline> optionalDeadline = deadlineRepository.findById(optionalAssignment.get().getDeadline().getDeadlineId());
             Date now = new Date();
             if (optionalDeadline.isEmpty()) {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "deadlineId"));
