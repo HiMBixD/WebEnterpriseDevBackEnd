@@ -75,20 +75,38 @@ public class CommonServices {
         }
     }
 
-    public Date setClosureDate(SetClosureDateRequest request) {
+    public Deadline setClosureDate(SetClosureDateRequest request) {
         try {
-            if (StringUtils.isEmpty(request.getYear())) {
-                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "year"));
+            if (StringUtils.isEmpty(request.getAction())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "action"));
             }
-            if (StringUtils.isEmpty(request.getClosureDate())) {
-                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "closureDate"));
+            if (StringUtils.isEmpty(request.getStartDate())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "startDate"));
+            }
+            if (StringUtils.isEmpty(request.getEndDate())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "endDate"));
             }
 //            UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             Deadline deadline = new Deadline();
-            deadline.setYear(Long.parseLong(request.getYear()));
-            deadline.setClosureDate(request.getClosureDate());
+            if (request.getAction().equals("create")) {
+                deadline.setStartDate(request.getStartDate());
+                deadline.setEndDate(request.getEndDate());
+            } else if (request.getAction().equals("set")) {
+                if (StringUtils.isEmpty(request.getId())) {
+                    throw new AppResponseException(new Message(AppConstants.NOT_NULL, "id"));
+                }
+                Optional<Deadline> optionalDeadline =  deadlineRepository.findDeadlineById(request.getId());
+                if (optionalDeadline.isEmpty()) {
+                    throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "id"));
+                }
+                deadline = optionalDeadline.get();
+                deadline.setStartDate(request.getStartDate());
+                deadline.setEndDate(request.getEndDate());
+            } else {
+
+            }
             deadlineRepository.save(deadline);
-            return deadline.getClosureDate();
+            return deadline;
         }catch (Exception e){
             throw e;
         }
@@ -155,8 +173,11 @@ public class CommonServices {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "deadlineId"));
 
             }
-            if (now.after(optionalDeadline.get().getClosureDate())) {
+            if (now.after(optionalDeadline.get().getEndDate())) {
                 throw new AppResponseException(new Message(AppConstants.INVALID, "This assignment is overdue"));
+            }
+            if (optionalDeadline.get().getStartDate().after(now)) {
+                throw new AppResponseException(new Message(AppConstants.INVALID, "This assignment is not yet opened"));
             }
         }catch (Exception e){
             throw e;

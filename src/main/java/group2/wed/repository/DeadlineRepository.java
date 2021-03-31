@@ -8,6 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface DeadlineRepository extends JpaRepository<Deadline, Integer> {
-    @Query("from Deadline d where d.year = :year")
-    Optional<Deadline> findDeadlineById(@Param("year") Long year);
+    @Query("from Deadline d where d.deadlineId = :deadlineId")
+    Optional<Deadline> findDeadlineById(@Param("deadlineId") Long deadlineId);
 }

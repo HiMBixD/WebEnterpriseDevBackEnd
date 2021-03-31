@@ -10,6 +10,8 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SetClosureDateRequest {
-    private String year;
-    private Date closureDate;
+    private String action;
+    private Long id;
+    private Date startDate;
+    private Date endDate;
 }
