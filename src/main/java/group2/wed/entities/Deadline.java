@@ -15,8 +15,12 @@ import java.util.Date;
 public class Deadline {
     @Id
     @Column(name = "deadline_id", nullable = false)
-    private Long year; // year as id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer deadlineId;
 
-    @Column(name = "closure_date")
-    private Date closureDate;
+    @Column(name = "end_date", nullable = false)
+    private Date endDate;
+
+    @Column(name = "start_date", nullable = false)
+    private Date startDate;
 }

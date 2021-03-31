@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetDeadLineRequest {
-    private Long year;
+    private Integer deadlineId;
 }

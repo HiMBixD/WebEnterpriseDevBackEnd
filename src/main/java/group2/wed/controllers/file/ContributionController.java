@@ -32,6 +32,15 @@ public class ContributionController {
     @Autowired
     FilesService filesService;
 
+    @PostMapping("/admin/clean-root")
+    public AppResponse deleteRoot() {
+        try {
+            return new AppResponseSuccess(filesService.deleteAll());
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
     @PostMapping("/upload")
     public AppResponse uploadFile(UploadFileRequest request) throws Exception {
         Message message = new Message();

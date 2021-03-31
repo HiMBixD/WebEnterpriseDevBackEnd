@@ -106,7 +106,7 @@ public class FilesService implements FilesServiceInterface {
             }
             List<File> files = fileRepository.getAllBySubmissionId(optional.get().getSubmissionId());
             return files;
-        }catch (Exception e){
+        } catch (Exception e){
             throw e;
         }
     }
@@ -132,10 +132,17 @@ public class FilesService implements FilesServiceInterface {
     }
 
     @Override
-    public void deleteAll() {
-        fileRepository.deleteAll();
-        FileSystemUtils.deleteRecursively(root.toFile());
-        LOG.info("Roots Deleted");
+    public Message deleteAll() {
+        try {
+            fileRepository.deleteAll();
+            FileSystemUtils.deleteRecursively(root.toFile());
+            Message message = new Message();
+            message.setMessage("Roots Deleted");
+            LOG.info(message.getMessage());
+            return message;
+        } catch (Exception e){
+            throw e;
+        }
     }
 
     @Override

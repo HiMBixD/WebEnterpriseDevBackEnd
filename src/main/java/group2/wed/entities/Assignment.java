@@ -26,9 +26,13 @@ public class Assignment {
     @Column(name = "CREATE_BY", length = 6, nullable = false)
     private String create_by;
 
-    @Column(name = "deadline_id", nullable = false)
+    @Column(name = "deadline_id", nullable = false, insertable = false, updatable = false)
     private Integer deadlineId;
 
     @Column(name = "FACULTY_ID", nullable = false)
     private Long facultyId;
+
+    @ManyToOne(optional=false)
+    @JoinColumn(name = "deadline_id",referencedColumnName="deadline_id")
+    private Deadline deadline;
 }

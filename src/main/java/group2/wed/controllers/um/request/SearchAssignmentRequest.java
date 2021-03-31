@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SearchAssignmentRequest {
     private Long facultyId;
-    private Integer year;
+    private Integer deadlineId;
 }

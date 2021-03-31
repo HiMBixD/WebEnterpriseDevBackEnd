@@ -18,7 +18,6 @@ public class WebApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... arg) throws Exception {
-		filesService.deleteAll();
 		filesService.init();
 	}
 }

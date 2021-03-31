@@ -15,6 +15,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Integer>
     @Query("from Assignment a where a.assignmentName = :assignmentName")
     Optional<Assignment> findAssignmentByName(@Param("assignmentName")String assignmentName);
 
-    @Query("FROM Assignment a WHERE (:facultyId is null or a.facultyId = :facultyId) and (:deadlineId is null or a.deadlineId = :deadlineId)")
+    @Query("FROM Assignment a WHERE (:facultyId is null or a.facultyId = :facultyId) and (:deadlineId is null or a.deadline.deadlineId = :deadlineId)")
     List<Assignment> searchAssignmentByFaOrYear(@Param("facultyId")Long facultyId, @Param("deadlineId")Integer deadlineId);
 }
