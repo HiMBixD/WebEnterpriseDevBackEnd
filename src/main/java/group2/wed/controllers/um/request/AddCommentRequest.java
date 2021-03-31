@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SelectSubmissionRequest {
-    private Integer submissionId;
-    private Integer status;
+public class AddCommentRequest {
+    private String content;
+    private Long submissionId;
 }

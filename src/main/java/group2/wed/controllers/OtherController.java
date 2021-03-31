@@ -1,15 +1,12 @@
 package group2.wed.controllers;
 
-import group2.wed.constant.AppConstants;
 import group2.wed.controllers.otherComponent.AppResponseException;
-import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.AdminController;
 import group2.wed.controllers.um.request.*;
 import group2.wed.controllers.um.response.AppResponse;
 import group2.wed.controllers.um.response.AppResponseFailure;
 import group2.wed.controllers.um.response.AppResponseSuccess;
 import group2.wed.services.CommonServices;
-import group2.wed.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/")
+@RequestMapping("/api/")
 public class OtherController {
     private static final Logger LOG = LoggerFactory.getLogger(AdminController.class);
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private CommonServices commonServices;
@@ -53,12 +48,23 @@ public class OtherController {
         }
     }
 
+    @PostMapping("get-Roles")
+    public AppResponse getRoles() {
+        try {
+            return new AppResponseSuccess(commonServices.getAllRoles());
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
     @PostMapping("student/post-submission")
     public AppResponse postSubmission(@RequestBody PostSubmissionRequest request) {
         try {
             return new AppResponseSuccess(commonServices.postSubmission(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
+        } catch (Exception e) {
+            return new AppResponseFailure(e.getMessage());
         }
     }
 
@@ -68,6 +74,8 @@ public class OtherController {
             return new AppResponseSuccess(commonServices.selectSubmission(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
+        } catch (Exception e) {
+            return new AppResponseFailure(e.getMessage());
         }
     }
 
@@ -75,6 +83,25 @@ public class OtherController {
     public AppResponse searchSubmission(@RequestBody SearchSubmissionRequest request) {
         try {
             return new AppResponseSuccess(commonServices.searchSubmissions(request));
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
+    @PostMapping("add-comment")
+    public AppResponse addComment(@RequestBody AddCommentRequest request) {
+        try {
+            commonServices.addComment(request);
+            return new AppResponseSuccess();
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
+    @PostMapping("get-comment")
+    public AppResponse getCommentBySubmission(@RequestBody GetCommentRequest request) {
+        try {
+            return new AppResponseSuccess(commonServices.getComments(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
         }

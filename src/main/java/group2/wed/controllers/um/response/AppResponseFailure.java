@@ -11,4 +11,8 @@ public class AppResponseFailure extends AppResponse{
         this.setSuccess(AppConstants.RESULT_ERROR);
         this.setResponseMessage(mess);
     }
+    public AppResponseFailure(String mess){
+        this.setSuccess(AppConstants.RESULT_ERROR);
+        this.setResponseMessage(new Message(mess));
+    }
 }

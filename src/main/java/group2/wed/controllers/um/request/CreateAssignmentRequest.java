@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateAssignmentRequest {
     private String assignName;
+    private String description;
     private Long facultyId;
 }

@@ -9,5 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SearchSubmissionRequest {
     private String username;
+    private Long assignmentId;
     private Integer status;
+    // status = 0 = no action yet;
+    // status = 1 = selected;
+    // status = 2 = deny + need fix;
+    // status = 3 = has comment no selected
 }

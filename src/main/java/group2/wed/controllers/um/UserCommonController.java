@@ -4,11 +4,13 @@ import group2.wed.constant.AppConstants;
 import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.request.ChangePassRequest;
+import group2.wed.controllers.um.request.GetDeadLineRequest;
 import group2.wed.controllers.um.request.GetUserInfoRequest;
 import group2.wed.controllers.um.request.UpdateUserInfoRequest;
 import group2.wed.controllers.um.response.AppResponse;
 import group2.wed.controllers.um.response.AppResponseFailure;
 import group2.wed.controllers.um.response.AppResponseSuccess;
+import group2.wed.services.CommonServices;
 import group2.wed.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,10 +19,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 public class UserCommonController {
     @Autowired
     private UserService userService;
+    @Autowired
+    private CommonServices commonServices;
 
     @PostMapping("/get-my-info")
     public AppResponse getMyInfo() {
@@ -65,6 +69,15 @@ public class UserCommonController {
     public AppResponse getUserInfo(@RequestBody GetUserInfoRequest request) {
         try {
             return new AppResponseSuccess(userService.getUserInfo(request));
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
+    @PostMapping("/get-deadline")
+    public AppResponse getDeadline(@RequestBody GetDeadLineRequest request) {
+        try {
+            return new AppResponseSuccess(commonServices.getDeadLine(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
         }

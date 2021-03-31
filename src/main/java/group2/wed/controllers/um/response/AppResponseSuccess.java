@@ -15,5 +15,10 @@ public class AppResponseSuccess extends AppResponse{
         this.setSuccess(AppConstants.RESULT_SUCCESS);
         this.setResponseMessage(message);
     }
+    public AppResponseSuccess(Object data, Message message){
+        this.setSuccess(AppConstants.RESULT_SUCCESS);
+        this.setData(data);
+        this.setResponseMessage(message);
+    }
 
 }

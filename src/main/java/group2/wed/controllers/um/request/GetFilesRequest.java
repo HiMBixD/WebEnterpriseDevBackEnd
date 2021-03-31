@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SelectSubmissionRequest {
-    private Integer submissionId;
-    private Integer status;
+public class GetFilesRequest {
+    private Long submissionId;
 }
