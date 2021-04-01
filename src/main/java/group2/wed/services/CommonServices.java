@@ -61,11 +61,12 @@ public class CommonServices {
 
     public List<Object> searchAssignment(SearchAssignmentRequest request) {
         try {
-            List<Assignment> list = assignmentRepository.searchAssignmentByFaOrYear(request.getFacultyId(), request.getDeadlineId());
+            List<Assignment> list = assignmentRepository.searchAssignmentByFaOrYearOrCreate_by(request.getFacultyId(), request.getDeadlineId(), request.getUsername());
             List<Object> objectList = list.stream().map(assignment -> new AssigmentDTO(assignment,
                     submissionRepository.countAllByAssignmentId(assignment.getAssignmentId()),
                     submissionRepository.countAllByStatusAndAssignmentId(1, assignment.getAssignmentId()))).collect(Collectors.toList());
             System.out.println(objectList);
+            System.out.println(list);
             return objectList;
         }catch (Exception e){
             throw e;
