@@ -5,6 +5,7 @@ import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.request.*;
 import group2.wed.entities.*;
+import group2.wed.entities.dto.AssigmentDTO;
 import group2.wed.entities.dto.UserDTO;
 import group2.wed.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CommonServices {
@@ -57,10 +59,14 @@ public class CommonServices {
         return roleRepository.findAll();
     }
 
-    public List<Assignment> searchAssignment(SearchAssignmentRequest request) {
+    public List<Object> searchAssignment(SearchAssignmentRequest request) {
         try {
             List<Assignment> list = assignmentRepository.searchAssignmentByFaOrYear(request.getFacultyId(), request.getDeadlineId());
-            return list;
+            List<Object> objectList = list.stream().map(assignment -> new AssigmentDTO(assignment,
+                    submissionRepository.countAllByAssignmentId(assignment.getAssignmentId()),
+                    submissionRepository.countAllByStatusAndAssignmentId(1, assignment.getAssignmentId()))).collect(Collectors.toList());
+            System.out.println(objectList);
+            return objectList;
         }catch (Exception e){
             throw e;
         }
