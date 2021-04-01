@@ -65,9 +65,18 @@ public class CommonServices {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "request"));
             }
             List<Assignment> list = assignmentRepository.searchAssignmentByFaOrYearOrCreate_by(request.getFacultyId(), request.getDeadlineId(), request.getUsername());
-            List<Object> objectList = list.stream().map(assignment -> new AssigmentDTO(assignment,
-                    submissionRepository.countAllByAssignmentId(assignment.getAssignmentId()),
-                    submissionRepository.countAllByStatusAndAssignmentId(1, assignment.getAssignmentId()))).collect(Collectors.toList());
+//            List<Object> objectList = list.stream().map(assignment -> new AssigmentDTO(assignment,
+//                    submissionRepository.countAllByAssignmentId(assignment.getAssignmentId()),
+//                    submissionRepository.countAllByStatusAndAssignmentId(1, assignment.getAssignmentId())))
+//                    .collect(Collectors.toList());
+            List<Object> objectList = list.stream().map(assignment -> {
+                 List<Submission> submissionList = submissionRepository.findAllByAssignmentId(assignment.getAssignmentId());
+                 int all=submissionList.size();
+                 int selected=submissionList.stream().filter(c->c.getStatus()==1).collect(Collectors.toList()).size();
+                 AssigmentDTO assigmentDTO = new AssigmentDTO(assignment,all,selected);
+                 return assigmentDTO;
+
+            }).collect(Collectors.toList());
             return objectList;
         }catch (Exception e){
             throw e;
