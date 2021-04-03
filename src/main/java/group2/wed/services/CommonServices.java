@@ -64,22 +64,13 @@ public class CommonServices {
             if (StringUtils.isEmpty(request)) {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "request"));
             }
-            List<Assignment> list = assignmentRepository.searchAssignmentByFaOrYearOrCreate_by(request.getFacultyId(), request.getDeadlineId(), request.getUsername());
-//            List<Object> objectList = list.stream().map(assignment -> new AssigmentDTO(assignment,
-//                    submissionRepository.countAllByAssignmentId(assignment.getAssignmentId()),
-//                    submissionRepository.countAllByStatusAndAssignmentId(1, assignment.getAssignmentId())))
-//                    .collect(Collectors.toList());
             List<Submission> submissionList = submissionRepository.findAll();
-            List<Object> objectList = list.stream().map(assignment -> {
-                 int all=submissionList.stream().filter(val->val.getAssignmentId().equals(assignment.getAssignmentId())).
-                         collect(Collectors.toList()).size();;
-                 int selected=submissionList.stream().filter(c->c.getStatus()==1 && c.getAssignmentId().equals(assignment.getAssignmentId())).
-                         collect(Collectors.toList()).size();
-                 AssigmentDTO assigmentDTO = new AssigmentDTO(assignment,all,selected);
-                 return assigmentDTO;
-
+            List<Assignment> list = assignmentRepository.searchAssignmentByFaOrYearOrCreate_by(request.getFacultyId(), request.getDeadlineId(), request.getUsername());
+            return list.stream().map(assignment -> {
+                 int all= (int) submissionList.stream().filter(val -> val.getAssignmentId().equals(assignment.getAssignmentId())).count();
+                 int selected= (int) submissionList.stream().filter(c -> c.getStatus() == 1 && c.getAssignmentId().equals(assignment.getAssignmentId())).count();
+                 return new AssigmentDTO(assignment,all,selected);
             }).collect(Collectors.toList());
-            return objectList;
         }catch (Exception e){
             throw e;
         }
