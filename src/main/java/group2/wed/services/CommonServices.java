@@ -69,10 +69,12 @@ public class CommonServices {
 //                    submissionRepository.countAllByAssignmentId(assignment.getAssignmentId()),
 //                    submissionRepository.countAllByStatusAndAssignmentId(1, assignment.getAssignmentId())))
 //                    .collect(Collectors.toList());
+            List<Submission> submissionList = submissionRepository.findAll();
             List<Object> objectList = list.stream().map(assignment -> {
-                 List<Submission> submissionList = submissionRepository.findAllByAssignmentId(assignment.getAssignmentId());
-                 int all=submissionList.size();
-                 int selected=submissionList.stream().filter(c->c.getStatus()==1).collect(Collectors.toList()).size();
+                 int all=submissionList.stream().filter(val->val.getAssignmentId().equals(assignment.getAssignmentId())).
+                         collect(Collectors.toList()).size();;
+                 int selected=submissionList.stream().filter(c->c.getStatus()==1 && c.getAssignmentId().equals(assignment.getAssignmentId())).
+                         collect(Collectors.toList()).size();
                  AssigmentDTO assigmentDTO = new AssigmentDTO(assignment,all,selected);
                  return assigmentDTO;
 
@@ -109,6 +111,29 @@ public class CommonServices {
             assignment.setCreate_by(userDetails.getUsername());
             assignment.setDeadline(optionalDeadline.get());
             assignment.setFacultyId(request.getFacultyId());
+            assignmentRepository.save(assignment);
+            return assignment;
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    public Assignment editAssignment(EditAssigmentRequest request) {
+        try {
+            Optional<Assignment> optional = assignmentRepository.findAssignmentById(request.getAssignmentId());
+            if (optional.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "assignmentId"));
+            }
+            Assignment assignment = optional.get();
+            if (!StringUtils.isEmpty(request.getDeadlineId())) {
+                Optional<Deadline> optionalDeadline = deadlineRepository.findById(request.getDeadlineId().intValue());
+                if (optionalDeadline.isEmpty()) {
+                    throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "deadlineId"));
+                }
+                assignment.setDeadline(optionalDeadline.get());
+            }
+            assignment.setAssignmentName(request.getAssignName());
+            assignment.setDescription(request.getDescription());
             assignmentRepository.save(assignment);
             return assignment;
         }catch (Exception e){

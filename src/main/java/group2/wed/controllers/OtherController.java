@@ -30,6 +30,15 @@ public class OtherController {
         }
     }
 
+    @PostMapping("edit-assignment")
+    public AppResponse editAssignment(@RequestBody EditAssigmentRequest request) {
+        try {
+            return new AppResponseSuccess(commonServices.editAssignment(request));
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
     @PostMapping("search-assignment")
     public AppResponse searchAssignment(@RequestBody SearchAssignmentRequest request) {
         try {
