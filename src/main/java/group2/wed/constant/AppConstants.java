@@ -9,7 +9,7 @@ public class AppConstants {
     public static final String ROOT_FOLDER = "uploads";
 
 
-    public static final long JWT_EXPIRATION = 15*60; // unit as seconds
+    public static final long JWT_EXPIRATION = 60*60; // unit as seconds
     public static final String AUTHORIZATION = "Authorization";
 
     // Validator
