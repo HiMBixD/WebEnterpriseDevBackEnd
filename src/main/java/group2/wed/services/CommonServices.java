@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -141,12 +142,19 @@ public class CommonServices {
             if (StringUtils.isEmpty(request.getAssignmentId())) {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "assignmentId"));
             }
-            Assignment assignment = checkValidClosure(request.getAssignmentId());
+            UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+            List<Submission> listSubmission = submissionRepository.
+                    searchByUsernameOrStatusOrAssignmentId(userDetails.getUsername(), null, null);
+            Assignment assignment = new Assignment();
+            if (listSubmission.isEmpty()) {
+                assignment = checkValidClosure(request.getAssignmentId(), false);
+            } else {
+                assignment = checkValidClosure(request.getAssignmentId(), true);
+            }
             Optional<User> teacherOptional = userService.findByUsername(assignment.getCreate_by());
             if (teacherOptional.isEmpty()) {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "Assignment's Owner"));
             }
-            UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             Submission submission = new Submission();
 //            submission.setYear(Long.parseLong(request.getYear()));
             submission.setAssignmentId(request.getAssignmentId());
@@ -177,7 +185,12 @@ public class CommonServices {
             if (optionalSubmission.isEmpty()) {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "submissionId"));
             }
-            Assignment assignment = checkValidClosure(optionalSubmission.get().getAssignmentId());
+
+            Optional<Assignment> optionalAssignment = assignmentRepository.findAssignmentById(optionalSubmission.get().getAssignmentId());
+            if (optionalAssignment.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "assignmentId"));
+            }
+            Assignment assignment = optionalAssignment.get();
             Submission submission = optionalSubmission.get();
             submission.setStatus(request.getStatus());
             // status = 0 = no action yet;
@@ -286,7 +299,7 @@ public class CommonServices {
     }
 
     // common functions
-    public Assignment checkValidClosure(Long assignmentId) {
+    public Assignment checkValidClosure(Long assignmentId, Boolean isSubmissionExisted) {
         try {
             Optional<Assignment> optionalAssignment = assignmentRepository.findAssignmentById(assignmentId);
             if (optionalAssignment.isEmpty()) {
@@ -298,8 +311,16 @@ public class CommonServices {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "deadlineId"));
 
             }
-            if (now.after(optionalDeadline.get().getEndDate())) {
-                throw new AppResponseException(new Message(AppConstants.INVALID, "This assignment is overdue"));
+
+            int addCondition = 0;
+            String mess = "Create failed!";
+            if (isSubmissionExisted) {
+                addCondition = 14;
+                mess= "14 days passed! Update failed!";
+            }
+
+            if (now.after(new Date(optionalDeadline.get().getEndDate().getTime() + addCondition*24*60*60*1000))) {
+                throw new AppResponseException(new Message(AppConstants.INVALID, mess + "This assignment is overdue"));
             }
             if (optionalDeadline.get().getStartDate().after(now)) {
                 throw new AppResponseException(new Message(AppConstants.INVALID, "This assignment is not yet opened"));
