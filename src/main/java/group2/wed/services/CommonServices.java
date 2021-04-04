@@ -6,7 +6,6 @@ import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.request.*;
 import group2.wed.entities.*;
 import group2.wed.entities.dto.AssigmentDTO;
-import group2.wed.entities.dto.UserDTO;
 import group2.wed.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,9 +17,6 @@ import org.springframework.util.StringUtils;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -177,8 +173,8 @@ public class CommonServices {
             }
             UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             List<Submission> listSubmission = submissionRepository.
-                    searchByUsernameOrStatusOrAssignmentId(userDetails.getUsername(), null, null);
-            Assignment assignment = new Assignment();
+                    searchByUsernameOrStatusOrAssignmentId(userDetails.getUsername(), null, request.getAssignmentId());
+            Assignment assignment;
             if (listSubmission.isEmpty()) {
                 assignment = checkValidClosure(request.getAssignmentId(), false);
             } else {
