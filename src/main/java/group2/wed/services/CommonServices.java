@@ -5,6 +5,7 @@ import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.request.*;
 import group2.wed.entities.*;
+import group2.wed.entities.dto.AssigmentDTO;
 import group2.wed.entities.dto.UserDTO;
 import group2.wed.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CommonServices {
@@ -58,10 +60,18 @@ public class CommonServices {
         return roleRepository.findAll();
     }
 
-    public List<Assignment> searchAssignment(SearchAssignmentRequest request) {
+    public List<Object> searchAssignment(SearchAssignmentRequest request) {
         try {
-            List<Assignment> list = assignmentRepository.searchAssignmentByFaOrYear(request.getFacultyId(), request.getDeadlineId());
-            return list;
+            if (StringUtils.isEmpty(request)) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "request"));
+            }
+            List<Submission> submissionList = submissionRepository.findAll();
+            List<Assignment> list = assignmentRepository.searchAssignmentByFaOrYearOrCreate_by(request.getFacultyId(), request.getDeadlineId(), request.getUsername());
+            return list.stream().map(assignment -> {
+                 int all= (int) submissionList.stream().filter(val -> val.getAssignmentId().equals(assignment.getAssignmentId())).count();
+                 int selected= (int) submissionList.stream().filter(c -> c.getStatus() == 1 && c.getAssignmentId().equals(assignment.getAssignmentId())).count();
+                 return new AssigmentDTO(assignment,all,selected);
+            }).collect(Collectors.toList());
         }catch (Exception e){
             throw e;
         }
@@ -93,6 +103,29 @@ public class CommonServices {
             assignment.setCreate_by(userDetails.getUsername());
             assignment.setDeadline(optionalDeadline.get());
             assignment.setFacultyId(request.getFacultyId());
+            assignmentRepository.save(assignment);
+            return assignment;
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    public Assignment editAssignment(EditAssigmentRequest request) {
+        try {
+            Optional<Assignment> optional = assignmentRepository.findAssignmentById(request.getAssignmentId());
+            if (optional.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "assignmentId"));
+            }
+            Assignment assignment = optional.get();
+            if (!StringUtils.isEmpty(request.getDeadlineId())) {
+                Optional<Deadline> optionalDeadline = deadlineRepository.findById(request.getDeadlineId().intValue());
+                if (optionalDeadline.isEmpty()) {
+                    throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "deadlineId"));
+                }
+                assignment.setDeadline(optionalDeadline.get());
+            }
+            assignment.setAssignmentName(request.getAssignName());
+            assignment.setDescription(request.getDescription());
             assignmentRepository.save(assignment);
             return assignment;
         }catch (Exception e){

@@ -17,4 +17,8 @@ public interface SubmissionRepository extends JpaRepository<Submission, Integer>
     List<Submission> searchByUsernameOrStatusOrAssignmentId(@Param("username")String username,
                                                             @Param("status")Integer status,
                                                             @Param("assignmentId")Long assignmentId);
+
+    Integer countAllByAssignmentId(@Param("assignmentId")Long assignmentId);
+    List<Submission> findAllByAssignmentId(Long assignmentId);
+    Integer countAllByStatusAndAssignmentId(@Param("status")Integer status, @Param("assignmentId")Long assignmentId);
 }
