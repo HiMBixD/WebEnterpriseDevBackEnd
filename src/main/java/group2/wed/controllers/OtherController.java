@@ -48,6 +48,15 @@ public class OtherController {
         }
     }
 
+    @PostMapping("get-assignment-by-id")
+    public AppResponse getAssignmentById(@RequestBody GetAssigmentByIdRequest request) {
+        try {
+            return new AppResponseSuccess(commonServices.getAssignment(request));
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
     @PostMapping("get-Faculties")
     public AppResponse getFaculties() {
         try {
@@ -92,6 +101,15 @@ public class OtherController {
     public AppResponse searchSubmission(@RequestBody SearchSubmissionRequest request) {
         try {
             return new AppResponseSuccess(commonServices.searchSubmissions(request));
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
+    @PostMapping("count-submission")
+    public AppResponse countSubmission(@RequestBody CountSubmisByFalcutyRequest request) {
+        try {
+            return new AppResponseSuccess(commonServices.countSubmissions(request));
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
         }

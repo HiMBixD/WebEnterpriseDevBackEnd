@@ -19,4 +19,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Integer>
             "and (:deadlineId is null or a.deadline.deadlineId = :deadlineId)" +
             "and (:create_by is null or a.create_by like CONCAT('%',:create_by,'%'))")
     List<Assignment> searchAssignmentByFaOrYearOrCreate_by(@Param("facultyId")Long facultyId, @Param("deadlineId")Integer deadlineId, @Param("create_by")String create_by);
+
+    List<Assignment> findAllByFacultyId(@Param("facultyId")Long facultyId);
 }

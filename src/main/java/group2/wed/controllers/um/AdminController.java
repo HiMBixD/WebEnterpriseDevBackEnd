@@ -78,4 +78,25 @@ public class AdminController {
             return new AppResponseFailure(exception.responseMessage);
         }
     }
+
+    @PostMapping("/backup-sql")
+    public AppResponse getBackupSql() {
+        try {
+            return new AppResponseSuccess(commonServices.backupSQL());
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        } catch (Exception e) {
+            return new AppResponseFailure(e.getMessage());
+        }
+    }
+
+    @PostMapping("/backup-root-folder")
+    public AppResponse getBackupRoot() {
+        try {
+            return new AppResponseSuccess();
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        }
+    }
+
 }

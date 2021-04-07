@@ -8,6 +8,7 @@ import group2.wed.entities.*;
 import group2.wed.entities.dto.AssigmentDTO;
 import group2.wed.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,13 +18,25 @@ import org.springframework.util.StringUtils;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class CommonServices {
+    @Value("$(db.username)")
+    private String dbUsername;
+    @Value("$(db.password)")
+    private String dbPassword;
+    @Value("$(db.schema)")
+    private String dbName;
+    @Value("$(db.port)")
+    private String dbPort;
+    @Value("$(db.hostname)")
+    private String dbHostName;
     @Autowired
     public JavaMailSender emailSender;
 
@@ -68,6 +81,22 @@ public class CommonServices {
                  int selected= (int) submissionList.stream().filter(c -> c.getStatus() == 1 && c.getAssignmentId().equals(assignment.getAssignmentId())).count();
                  return new AssigmentDTO(assignment,all,selected);
             }).collect(Collectors.toList());
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    public Assignment getAssignment(GetAssigmentByIdRequest request) {
+        try {
+            if (StringUtils.isEmpty(request.getAssignmentId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "assignmentId"));
+            }
+            Optional<Assignment> optional = assignmentRepository.findAssignmentById(request.getAssignmentId());
+            if (optional.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "assignmentId"));
+            }
+            UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+            return optional.get();
         }catch (Exception e){
             throw e;
         }
@@ -251,6 +280,22 @@ public class CommonServices {
         }
     }
 
+    public List<Submission> countSubmissions(CountSubmisByFalcutyRequest request) {
+        try {
+            if (StringUtils.isEmpty(request.getFacultyId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "facultyId"));
+            }
+            List<Assignment> listAssignments = assignmentRepository.findAllByFacultyId(request.getFacultyId());
+            List<Submission> submissions = submissionRepository.findAllByAssignmentIdIn(
+                    listAssignments.stream().map(assignment -> assignment.getAssignmentId())
+                            .collect(Collectors.toList())
+            );
+            return submissions;
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
     public void addComment(AddCommentRequest request) {
         try {
             if (StringUtils.isEmpty(request.getSubmissionId())) {
@@ -368,5 +413,44 @@ public class CommonServices {
         helper.setTo(directEmail);
         helper.setSubject(header);
         this.emailSender.send(message);
+    }
+
+    public boolean backupSQL()
+            throws IOException, InterruptedException {
+        try {
+            final List<String> baseCmds = new ArrayList<String>();
+            baseCmds.add("pg_dump");
+            baseCmds.add("-h");
+            baseCmds.add(dbHostName);
+            baseCmds.add("-p");
+            baseCmds.add(dbPort);
+            baseCmds.add("-U");
+            baseCmds.add(dbUsername);
+            baseCmds.add("-b");
+            baseCmds.add("-v");
+            baseCmds.add("-f");
+            baseCmds.add("/backup/backup.sql");
+            baseCmds.add(dbName);
+            final ProcessBuilder pb = new ProcessBuilder(baseCmds);
+
+            // Set the password
+            final Map<String, String> env = pb.environment();
+            env.put("PGPASSWORD", dbPassword);
+            final Process process = pb.start();
+
+            final BufferedReader r = new BufferedReader(
+                    new InputStreamReader(process.getErrorStream()));
+            String line = r.readLine();
+            while (line != null) {
+                System.err.println(line);
+                line = r.readLine();
+            }
+            r.close();
+
+            final int dcertExitCode = process.waitFor();
+            return true;
+        }catch (Exception e){
+            throw e;
+        }
     }
 }
