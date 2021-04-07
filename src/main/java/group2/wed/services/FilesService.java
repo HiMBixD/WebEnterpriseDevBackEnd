@@ -136,6 +136,8 @@ public class FilesService implements FilesServiceInterface {
         try {
             fileRepository.deleteAll();
             FileSystemUtils.deleteRecursively(root.toFile());
+            FileSystemUtils.deleteRecursively(Paths.get("backup").toFile());
+
             Message message = new Message();
             message.setMessage("Roots Deleted");
             LOG.info(message.getMessage());

@@ -429,7 +429,7 @@ public class CommonServices {
             baseCmds.add("-b");
             baseCmds.add("-v");
             baseCmds.add("-f");
-            baseCmds.add("/backup/backup.sql");
+            baseCmds.add("uploads/backup/backup.sql");
             baseCmds.add(dbName);
             final ProcessBuilder pb = new ProcessBuilder(baseCmds);
 
