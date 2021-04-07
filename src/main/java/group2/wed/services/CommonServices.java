@@ -21,6 +21,8 @@ import javax.mail.internet.MimeMessage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -429,7 +431,8 @@ public class CommonServices {
             baseCmds.add("-b");
             baseCmds.add("-v");
             baseCmds.add("-f");
-            baseCmds.add("uploads/backup/backup.sql");
+            baseCmds.add(root + " ." +
+                    "/backup.sql");
             baseCmds.add(dbName);
             final ProcessBuilder pb = new ProcessBuilder(baseCmds);
 
@@ -453,4 +456,6 @@ public class CommonServices {
             throw e;
         }
     }
+    private final Path root = Paths.get(AppConstants.ROOT_FOLDER);
+
 }
