@@ -6,6 +6,7 @@ import group2.wed.controllers.otherComponent.Message;
 import group2.wed.controllers.um.request.*;
 import group2.wed.entities.*;
 import group2.wed.entities.dto.AssigmentDTO;
+import group2.wed.entities.dto.SubmissionDTO;
 import group2.wed.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -273,10 +274,15 @@ public class CommonServices {
         }
     }
 
-    public List<Submission> searchSubmissions(SearchSubmissionRequest request) {
+    public List<SubmissionDTO> searchSubmissions(SearchSubmissionRequest request) {
         try {
             List<Submission> list = submissionRepository.searchByUsernameOrStatusOrAssignmentId(request.getUsername(), request.getStatus(), request.getAssignmentId());
-            return list;
+            List<Comment> commentList = commentRepository.findAllBySubmissionIdIn(
+                    list.stream().map(Submission::getSubmissionId).collect(Collectors.toList())
+            );
+            List<SubmissionDTO> submissionDTOS = list.stream().map(submission -> new SubmissionDTO(submission, (int)commentList.stream().
+                    filter(val -> val.getSubmissionId().equals(submission.getSubmissionId())).count())).collect(Collectors.toList());
+            return submissionDTOS;
         }catch (Exception e){
             throw e;
         }
@@ -288,11 +294,10 @@ public class CommonServices {
                 throw new AppResponseException(new Message(AppConstants.NOT_NULL, "facultyId"));
             }
             List<Assignment> listAssignments = assignmentRepository.findAllByFacultyId(request.getFacultyId());
-            List<Submission> submissions = submissionRepository.findAllByAssignmentIdIn(
-                    listAssignments.stream().map(assignment -> assignment.getAssignmentId())
+            return submissionRepository.findAllByAssignmentIdIn(
+                    listAssignments.stream().map(Assignment::getAssignmentId)
                             .collect(Collectors.toList())
             );
-            return submissions;
         }catch (Exception e){
             throw e;
         }
@@ -421,7 +426,7 @@ public class CommonServices {
             throws IOException, InterruptedException {
         try {
             final List<String> baseCmds = new ArrayList<String>();
-            baseCmds.add("pg_dump");
+            baseCmds.add("C:\\Program Files\\PostgreSQL\\13\\bin\\pg_dump");
             baseCmds.add("-h");
             baseCmds.add(dbHostName);
             baseCmds.add("-p");
@@ -431,16 +436,23 @@ public class CommonServices {
             baseCmds.add("-b");
             baseCmds.add("-v");
             baseCmds.add("-f");
-            baseCmds.add(root + " ." +
-                    "/backup.sql");
+            baseCmds.add("E:\\programer\\Topup\\wed\\WebEnterpriseDevBackEnd\\uploads\\" +
+                    "backup.sql");
             baseCmds.add(dbName);
-            final ProcessBuilder pb = new ProcessBuilder(baseCmds);
+            final ProcessBuilder pb = new ProcessBuilder(
+                    "C:\\Program Files\\PostgreSQL\\13\\bin\\pg_dump",
+                    "--host=" + dbHostName,
+                    "--port=" + dbPort,
+                    "--username=" + dbUsername,
+                    "--password=" + dbPassword,
+                    "--format=custom",
+                    "--blobs",
+                    "--verbose", "--file=D:\\service_station_backup.sql", dbName);
 
-            // Set the password
-            final Map<String, String> env = pb.environment();
-            env.put("PGPASSWORD", dbPassword);
-            final Process process = pb.start();
-
+//            // Set the password
+//            final Map<String, String> env = pb.environment();
+//            env.put("PGPASSWORD", dbPassword);
+            Process process = pb.start();
             final BufferedReader r = new BufferedReader(
                     new InputStreamReader(process.getErrorStream()));
             String line = r.readLine();

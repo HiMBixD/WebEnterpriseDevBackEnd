@@ -10,4 +10,5 @@ import java.util.List;
 public interface CommentRepository  extends JpaRepository<Comment, Integer> {
     @Query("FROM Comment c WHERE c.submissionId = :submissionId")
     List<Comment> getAllBySubmissionId(@Param("submissionId")Integer submissionId);
+    List<Comment> findAllBySubmissionIdIn(List<Integer> listId);
 }
