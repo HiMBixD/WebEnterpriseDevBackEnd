@@ -22,4 +22,5 @@ public interface FilesServiceInterface {
     public Message deleteAll() throws IOException;
 
     public Stream<Path> loadAll();
+    public void downloadAll() throws Exception;
 }

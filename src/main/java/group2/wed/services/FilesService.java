@@ -140,12 +140,12 @@ public class FilesService implements FilesServiceInterface {
             throw new RuntimeException("Error: " + e.getMessage());
         }
     }
-
-    public void downloadAll()  throws Exception {
+    @Override
+    public void downloadAll() throws Exception {
         try {
-            Path zipFile = Files.createFile(root);
+            Path zipFile = Files.createFile(Paths.get(AppConstants.TEMP_FOLDER + "/" + AppConstants.ROOT_FOLDER + ".zip"));
 
-            Path sourceDirPath = Paths.get(AppConstants.TEMP_FOLDER + "/upload.zip");
+            Path sourceDirPath = root;
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile));
                  Stream<Path> paths = Files.walk(sourceDirPath)) {
                 paths

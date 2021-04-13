@@ -54,11 +54,10 @@ public class ContributionController {
         }
     }
 
-    @PostMapping("/download-root")
+    @PostMapping("/admin/download-root")
     public AppResponse downloadRoot() {
         try {
             filesService.downloadAll();
-
             return new AppResponseSuccess();
         } catch (AppResponseException exception) {
             return new AppResponseFailure(exception.responseMessage);
