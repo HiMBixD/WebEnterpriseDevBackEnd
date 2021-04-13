@@ -71,6 +71,26 @@ public class ContributionController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 
+    @GetMapping("/download-submission/{submissionId:.+}")
+    public ResponseEntity<Resource> downloadSubmission(@PathVariable Integer submissionId) throws Exception {
+        Resource file = filesService.downloadSubmission(submissionId);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+    }
+
+    @PostMapping("/import-root")
+    public AppResponse importFileRoot(UploadFileRequest request) throws Exception {
+        Message message = new Message();
+        try {
+            message.setMessage("Import the file root successfully");
+            return new AppResponseSuccess(filesService.importFileRoot(request), message);
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        } catch (IOException exception) {
+            return new AppResponseFailure(exception.getMessage());
+        }
+    }
+
     @PostMapping("/get-files")
     public AppResponse getFiles(@RequestBody GetFilesRequest request) {
         try {
