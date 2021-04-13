@@ -13,6 +13,7 @@ import group2.wed.repository.AssignmentRepository;
 import group2.wed.repository.FileRepository;
 import group2.wed.repository.SubmissionRepository;
 import group2.wed.services.interfaces.FilesServiceInterface;
+import net.lingala.zip4j.ZipFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,37 @@ public class FilesService implements FilesServiceInterface {
         }
     }
 
+    public boolean importFileRoot(UploadFileRequest request) throws Exception {
+        try {
+            if (request.getFile().isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "file"));
+            }
+            if (!Objects.requireNonNull(request.getFile().getOriginalFilename()).contains(".zip")) {
+                throw new AppResponseException(new Message(AppConstants.INVALID, "fileType"));
+            }
+            String url = AppConstants.TEMP_FOLDER + "/restore";
+            Path path = Paths.get(url);
+            if (Files.exists(path)) {
+                FileSystemUtils.deleteRecursively(path.toFile());
+                Files.createDirectories(path);
+            } else {
+                Files.createDirectories(path);
+            }
+            MultipartFile file = request.getFile();
+
+            java.io.File fil = new java.io.File(url+'/'+file.getOriginalFilename());
+            if (fil.exists() && !fil.isDirectory()) {
+                throw new AppResponseException(new Message(AppConstants.EXISTED, "file"));
+            }
+            Files.copy(request.getFile().getInputStream(), path.resolve(Objects.requireNonNull(file.getOriginalFilename())));
+
+            new ZipFile(Paths.get(url+ "\\" + file.getOriginalFilename()).toFile())
+                    .extractAll(root.toString());
+            return true;
+        } catch (Exception e){
+            throw e;
+        }
+    }
     @Override
     public File save(UploadFileRequest request) throws Exception {
         try {
@@ -259,6 +291,27 @@ public class FilesService implements FilesServiceInterface {
             return Files.walk(this.root, 1).filter(path -> !path.equals(this.root)).map(this.root::relativize);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load all of the files!");
+        }
+    }
+
+    public Resource downloadSubmission(Integer submissionId) throws Exception {
+        if (StringUtils.isEmpty(submissionId)) {
+            throw new AppResponseException(new Message(AppConstants.NOT_NULL, "submissionId"));
+        }
+        Optional<Submission> optional = submissionRepository.findById(submissionId);
+        if (optional.isEmpty()) {
+            throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "submissionId"));
+        }
+        String fileName = "submission-of-" +optional.get().getUsername() + "-id-" + optional.get().getSubmissionId();
+        String sourceDirectoryLocation = AppConstants.ROOT_FOLDER + "\\" + optional.get().getUsername() + "\\" + optional.get().getSubmissionId();
+        zipFolder(sourceDirectoryLocation, fileName);
+        Path file = Paths.get(AppConstants.TEMP_FOLDER + "\\" + fileName + ".zip");
+        Resource resource = new UrlResource(file.toUri());
+
+        if (resource.exists() || resource.isReadable()) {
+            return resource;
+        } else {
+            throw new RuntimeException("Failed to download the file!");
         }
     }
 }
