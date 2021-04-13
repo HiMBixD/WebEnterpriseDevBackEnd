@@ -2,6 +2,7 @@ package group2.wed.controllers.file;
 
 import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.otherComponent.Message;
+import group2.wed.controllers.um.request.DownloadSelectedRequest;
 import group2.wed.controllers.um.request.GetFilesRequest;
 import group2.wed.controllers.um.request.UploadFileRequest;
 import group2.wed.controllers.um.response.AppResponse;
@@ -54,16 +55,20 @@ public class ContributionController {
         }
     }
 
-    @PostMapping("/admin/download-root")
-    public AppResponse downloadRoot() {
-        try {
-            filesService.downloadAll();
-            return new AppResponseSuccess();
-        } catch (AppResponseException exception) {
-            return new AppResponseFailure(exception.responseMessage);
-        } catch (Exception e) {
-            return new AppResponseFailure(e.getMessage());
-        }
+    @GetMapping("/unsecure/download-root")
+    public ResponseEntity<Resource> downloadRoot() throws Exception {
+        Resource file = filesService.downloadAll();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+    }
+
+    @GetMapping("/download-selected/{assignmentId:.+}")
+    public ResponseEntity<Resource> downloadSelectedAll(@PathVariable Long assignmentId) throws Exception {
+        DownloadSelectedRequest request = new DownloadSelectedRequest();
+        request.setAssignmentId(assignmentId);
+        Resource file = filesService.downloadAllSelected(request);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 
     @PostMapping("/get-files")

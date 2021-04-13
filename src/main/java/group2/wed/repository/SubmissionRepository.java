@@ -21,6 +21,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Integer>
 
     Integer countAllByAssignmentId(@Param("assignmentId")Long assignmentId);
     List<Submission> findAllByAssignmentId(Long assignmentId);
+    List<Submission> findAllByAssignmentIdAndStatus(Long assignmentId, Integer status);
     List<Submission> findAllByAssignmentIdIn(List<Long> listId);
     Integer countAllByStatusAndAssignmentId(@Param("status")Integer status, @Param("assignmentId")Long assignmentId);
 }
