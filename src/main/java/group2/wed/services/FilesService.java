@@ -56,7 +56,7 @@ public class FilesService implements FilesServiceInterface {
             if (!Files.exists(root)) {
                 Files.createDirectory(root);
             } else LOG.info("Root existed");
-            FileSystemUtils.deleteRecursively(tempt.toFile());
+//            FileSystemUtils.deleteRecursively(tempt.toFile());
             if (!Files.exists(tempt)) {
                 Files.createDirectory(tempt);
             } else LOG.info("Tempt existed");
