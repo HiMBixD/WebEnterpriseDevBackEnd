@@ -56,7 +56,9 @@ public class FilesService implements FilesServiceInterface {
             if (!Files.exists(root)) {
                 Files.createDirectory(root);
             } else LOG.info("Root existed");
-//            FileSystemUtils.deleteRecursively(tempt.toFile());
+            if (Files.exists(tempt)) {
+                FileSystemUtils.deleteRecursively(tempt.toFile());
+            }
             if (!Files.exists(tempt)) {
                 Files.createDirectory(tempt);
             } else LOG.info("Tempt existed");
@@ -143,7 +145,7 @@ public class FilesService implements FilesServiceInterface {
         try {
             Path zipFile = Files.createFile(root);
 
-            Path sourceDirPath = tempt;
+            Path sourceDirPath = Paths.get(AppConstants.TEMP_FOLDER + "/upload.zip");
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile));
                  Stream<Path> paths = Files.walk(sourceDirPath)) {
                 paths
