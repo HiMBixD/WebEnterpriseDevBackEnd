@@ -20,7 +20,7 @@ public class Assignment {
     @Column(name = "ASSIGNMENT_NAME", length = 30, nullable = false)
     private String assignmentName;
 
-    @Column(name = "DESCRIPTION", length = 100)
+    @Column(name = "DESCRIPTION", length = 1000)
     private String description;
 
     @Column(name = "CREATE_BY", length = 6, nullable = false)

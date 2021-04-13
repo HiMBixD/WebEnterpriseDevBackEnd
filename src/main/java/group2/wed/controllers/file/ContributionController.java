@@ -54,6 +54,19 @@ public class ContributionController {
         }
     }
 
+    @PostMapping("/download-root")
+    public AppResponse downloadRoot() {
+        try {
+            filesService.downloadAll();
+
+            return new AppResponseSuccess();
+        } catch (AppResponseException exception) {
+            return new AppResponseFailure(exception.responseMessage);
+        } catch (Exception e) {
+            return new AppResponseFailure(e.getMessage());
+        }
+    }
+
     @PostMapping("/get-files")
     public AppResponse getFiles(@RequestBody GetFilesRequest request) {
         try {

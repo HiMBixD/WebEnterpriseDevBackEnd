@@ -7,6 +7,8 @@ public class AppConstants {
     public static final String SYSTEM_EMAIL_PASSWORD = "ducanh123456";
 
     public static final String ROOT_FOLDER = "uploads";
+    public static final String TEMP_FOLDER = "tempts/root.zip";
+
 
 
     public static final long JWT_EXPIRATION = 60*60; // unit as seconds

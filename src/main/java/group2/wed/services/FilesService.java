@@ -34,11 +34,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class FilesService implements FilesServiceInterface {
     private static final Logger LOG = LoggerFactory.getLogger(FilesService.class);
     private final Path root = Paths.get(AppConstants.ROOT_FOLDER);
+    private final Path tempt = Paths.get(AppConstants.TEMP_FOLDER);
+
 
     @Autowired
     private SubmissionRepository submissionRepository;
@@ -52,8 +56,12 @@ public class FilesService implements FilesServiceInterface {
             if (!Files.exists(root)) {
                 Files.createDirectory(root);
             } else LOG.info("Root existed");
+            FileSystemUtils.deleteRecursively(tempt.toFile());
+            if (!Files.exists(tempt)) {
+                Files.createDirectory(tempt);
+            } else LOG.info("Tempt existed");
         } catch (IOException e) {
-            throw new RuntimeException("Create root folder failed");
+            throw new RuntimeException("Create Tempt folder failed");
         }
     }
 
@@ -131,11 +139,39 @@ public class FilesService implements FilesServiceInterface {
         }
     }
 
+    public void downloadAll()  throws Exception {
+        try {
+            Path zipFile = Files.createFile(root);
+
+            Path sourceDirPath = tempt;
+            try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile));
+                 Stream<Path> paths = Files.walk(sourceDirPath)) {
+                paths
+                        .filter(path -> !Files.isDirectory(path))
+                        .forEach(path -> {
+                            ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString());
+                            try {
+                                zipOutputStream.putNextEntry(zipEntry);
+                                Files.copy(path, zipOutputStream);
+                                zipOutputStream.closeEntry();
+                            } catch (IOException e) {
+                                throw new AppResponseException(new Message("IOExcept", "zip file Fail"));
+                            }
+                        });
+            }
+            LOG.info("Zip is created at : "+zipFile);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Error: " + e.getMessage());
+        }
+    }
+
     @Override
     public Message deleteAll() {
         try {
             fileRepository.deleteAll();
             FileSystemUtils.deleteRecursively(root.toFile());
+            FileSystemUtils.deleteRecursively(tempt.toFile());
+
             FileSystemUtils.deleteRecursively(Paths.get("backup").toFile());
 
             Message message = new Message();
