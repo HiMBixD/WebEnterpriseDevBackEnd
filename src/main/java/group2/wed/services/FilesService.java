@@ -3,12 +3,13 @@ package group2.wed.services;
 import group2.wed.constant.AppConstants;
 import group2.wed.controllers.otherComponent.AppResponseException;
 import group2.wed.controllers.otherComponent.Message;
+import group2.wed.controllers.um.request.DownloadSelectedRequest;
 import group2.wed.controllers.um.request.GetFilesRequest;
 import group2.wed.controllers.um.request.UploadFileRequest;
+import group2.wed.entities.Assignment;
 import group2.wed.entities.File;
 import group2.wed.entities.Submission;
-import group2.wed.entities.User;
-import group2.wed.entities.dto.UserDTO;
+import group2.wed.repository.AssignmentRepository;
 import group2.wed.repository.FileRepository;
 import group2.wed.repository.SubmissionRepository;
 import group2.wed.services.interfaces.FilesServiceInterface;
@@ -30,6 +31,8 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,6 +49,9 @@ public class FilesService implements FilesServiceInterface {
 
     @Autowired
     private SubmissionRepository submissionRepository;
+
+    @Autowired
+    private AssignmentRepository assignmentRepository;
 
     @Autowired
     private FileRepository fileRepository;
@@ -141,32 +147,94 @@ public class FilesService implements FilesServiceInterface {
         }
     }
     @Override
-    public void downloadAll() throws Exception {
+    public Resource downloadAll() throws Exception {
         try {
-            Path zipFile = Files.createFile(Paths.get(AppConstants.TEMP_FOLDER + "/" + AppConstants.ROOT_FOLDER + ".zip"));
 
-            Path sourceDirPath = root;
-            try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile));
-                 Stream<Path> paths = Files.walk(sourceDirPath)) {
-                paths
-                        .filter(path -> !Files.isDirectory(path))
-                        .forEach(path -> {
-                            ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString());
-                            try {
-                                zipOutputStream.putNextEntry(zipEntry);
-                                Files.copy(path, zipOutputStream);
-                                zipOutputStream.closeEntry();
-                            } catch (IOException e) {
-                                throw new AppResponseException(new Message("IOExcept", "zip file Fail"));
-                            }
-                        });
+            String fileName = "root-" + LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyy"));
+            zipFolder(AppConstants.ROOT_FOLDER, fileName);
+            Path file = Paths.get(AppConstants.TEMP_FOLDER + "\\" + fileName + ".zip");
+            Resource resource = new UrlResource(file.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            } else {
+                throw new RuntimeException("Failed to download the file!");
             }
-            LOG.info("Zip is created at : "+zipFile);
         } catch (MalformedURLException e) {
             throw new RuntimeException("Error: " + e.getMessage());
         }
     }
 
+    public Resource downloadAllSelected(DownloadSelectedRequest request) throws Exception {
+        if (StringUtils.isEmpty(request.getAssignmentId())) {
+            throw new AppResponseException(new Message(AppConstants.NOT_NULL, "assigmentId"));
+        }
+        Optional<Assignment> optional = assignmentRepository.findAssignmentById(request.getAssignmentId());
+        if (optional.isEmpty()) {
+            throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "assigmentId"));
+        }
+        List<Submission> submissionList = submissionRepository.findAllByAssignmentIdAndStatus(optional.get().getAssignmentId(),1);
+        String destinationDirectoryLocation = AppConstants.TEMP_FOLDER + "\\selected\\";
+
+        if (Files.exists(Paths.get(destinationDirectoryLocation))) {
+            FileSystemUtils.deleteRecursively(Paths.get(destinationDirectoryLocation).toFile());
+        }
+        submissionList.forEach(submission -> {
+            String sourceDirectoryLocation = AppConstants.ROOT_FOLDER + "\\" + submission.getUsername() + "\\" + submission.getSubmissionId();
+            try {
+                Files.walk(Paths.get(sourceDirectoryLocation))
+                        .forEach(source -> {
+                            Path destination = Paths.get(destinationDirectoryLocation, source.toString()
+                                    .substring(AppConstants.ROOT_FOLDER.length()));
+                            try {
+                                if (!Files.isDirectory(source)) {
+                                    Files.copy(source, destination);
+                                } else {
+                                    Files.createDirectories(destination);
+                                }
+                            } catch (IOException e) {
+                                throw new AppResponseException(new Message("Move folder child fail", destination.toString()));                            }
+                        });
+            } catch (IOException e) {
+                throw new AppResponseException(new Message("Move folder submission fail"));
+            }
+        });
+        String fileName = "selected-of-" +optional.get().getAssignmentName();
+        zipFolder(destinationDirectoryLocation, fileName);
+        Path file = Paths.get(AppConstants.TEMP_FOLDER + "\\" + fileName + ".zip");
+        Resource resource = new UrlResource(file.toUri());
+
+        if (resource.exists() || resource.isReadable()) {
+            return resource;
+        } else {
+            throw new RuntimeException("Failed to download the file!");
+        }
+
+    }
+
+    public void zipFolder(String source, String fileName) throws Exception {
+        if (Files.exists(Paths.get(AppConstants.TEMP_FOLDER + "\\" + fileName + ".zip"))) {
+            FileSystemUtils.deleteRecursively(Paths.get(AppConstants.TEMP_FOLDER + "\\" + fileName + ".zip").toFile());
+        }
+        Path zipFile = Files.createFile(Paths.get(AppConstants.TEMP_FOLDER + "\\" + fileName + ".zip"));
+        Path sourceDirPath = Paths.get(source);
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile));
+             Stream<Path> paths = Files.walk(sourceDirPath)) {
+            paths
+                    .filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+                        ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString());
+                        try {
+                            zipOutputStream.putNextEntry(zipEntry);
+                            Files.copy(path, zipOutputStream);
+                            zipOutputStream.closeEntry();
+                        } catch (IOException e) {
+                            throw new AppResponseException(new Message("IOExcept", "zip file Fail"));
+                        }
+                    });
+        }
+        LOG.info("Zip is created at : "+zipFile);
+    }
     @Override
     public Message deleteAll() {
         try {

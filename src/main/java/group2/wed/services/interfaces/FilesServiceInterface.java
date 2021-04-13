@@ -5,7 +5,6 @@ import group2.wed.controllers.um.request.GetFilesRequest;
 import group2.wed.controllers.um.request.UploadFileRequest;
 import group2.wed.entities.File;
 import org.springframework.core.io.Resource;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -22,5 +21,5 @@ public interface FilesServiceInterface {
     public Message deleteAll() throws IOException;
 
     public Stream<Path> loadAll();
-    public void downloadAll() throws Exception;
+    public Resource downloadAll() throws Exception;
 }
