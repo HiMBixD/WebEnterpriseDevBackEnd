@@ -98,7 +98,7 @@ public class FilesService implements FilesServiceInterface {
             }
             Files.copy(request.getFile().getInputStream(), path.resolve(Objects.requireNonNull(file.getOriginalFilename())));
 
-            new ZipFile(Paths.get(url+ "\\" + file.getOriginalFilename()).toFile())
+            new ZipFile(Paths.get(url+ "/" + file.getOriginalFilename()).toFile())
                     .extractAll(root.toString());
             return true;
         } catch (Exception e){
