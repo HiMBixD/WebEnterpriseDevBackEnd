@@ -184,7 +184,7 @@ public class FilesService implements FilesServiceInterface {
 
             String fileName = "root-" + LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyy"));
             zipFolder(AppConstants.ROOT_FOLDER, fileName);
-            Path file = Paths.get(AppConstants.TEMP_FOLDER + "\\" + fileName + ".zip");
+            Path file = Paths.get(AppConstants.TEMP_FOLDER + "/" + fileName + ".zip");
             Resource resource = new UrlResource(file.toUri());
 
             if (resource.exists() || resource.isReadable()) {
@@ -206,13 +206,13 @@ public class FilesService implements FilesServiceInterface {
             throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "assigmentId"));
         }
         List<Submission> submissionList = submissionRepository.findAllByAssignmentIdAndStatus(optional.get().getAssignmentId(),1);
-        String destinationDirectoryLocation = AppConstants.TEMP_FOLDER + "\\selected\\";
+        String destinationDirectoryLocation = AppConstants.TEMP_FOLDER + "/selected/";
 
         if (Files.exists(Paths.get(destinationDirectoryLocation))) {
             FileSystemUtils.deleteRecursively(Paths.get(destinationDirectoryLocation).toFile());
         }
         submissionList.forEach(submission -> {
-            String sourceDirectoryLocation = AppConstants.ROOT_FOLDER + "\\" + submission.getUsername() + "\\" + submission.getSubmissionId();
+            String sourceDirectoryLocation = AppConstants.ROOT_FOLDER + "/" + submission.getUsername() + "/" + submission.getSubmissionId();
             try {
                 Files.walk(Paths.get(sourceDirectoryLocation))
                         .forEach(source -> {
@@ -233,7 +233,7 @@ public class FilesService implements FilesServiceInterface {
         });
         String fileName = "selected-of-" +optional.get().getAssignmentName();
         zipFolder(destinationDirectoryLocation, fileName);
-        Path file = Paths.get(AppConstants.TEMP_FOLDER + "\\" + fileName + ".zip");
+        Path file = Paths.get(AppConstants.TEMP_FOLDER + "/" + fileName + ".zip");
         Resource resource = new UrlResource(file.toUri());
 
         if (resource.exists() || resource.isReadable()) {
@@ -245,10 +245,10 @@ public class FilesService implements FilesServiceInterface {
     }
 
     public void zipFolder(String source, String fileName) throws Exception {
-        if (Files.exists(Paths.get(AppConstants.TEMP_FOLDER + "\\" + fileName + ".zip"))) {
-            FileSystemUtils.deleteRecursively(Paths.get(AppConstants.TEMP_FOLDER + "\\" + fileName + ".zip").toFile());
+        if (Files.exists(Paths.get(AppConstants.TEMP_FOLDER + "/" + fileName + ".zip"))) {
+            FileSystemUtils.deleteRecursively(Paths.get(AppConstants.TEMP_FOLDER + "/" + fileName + ".zip").toFile());
         }
-        Path zipFile = Files.createFile(Paths.get(AppConstants.TEMP_FOLDER + "\\" + fileName + ".zip"));
+        Path zipFile = Files.createFile(Paths.get(AppConstants.TEMP_FOLDER + "/" + fileName + ".zip"));
         Path sourceDirPath = Paths.get(source);
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile));
              Stream<Path> paths = Files.walk(sourceDirPath)) {
@@ -302,10 +302,10 @@ public class FilesService implements FilesServiceInterface {
         if (optional.isEmpty()) {
             throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "submissionId"));
         }
-        String fileName = "submission-of-" +optional.get().getUsername() + "-id-" + optional.get().getSubmissionId();
-        String sourceDirectoryLocation = AppConstants.ROOT_FOLDER + "\\" + optional.get().getUsername() + "\\" + optional.get().getSubmissionId();
+        String fileName = "sub" +optional.get().getUsername() + "Id" + optional.get().getSubmissionId();
+        String sourceDirectoryLocation = AppConstants.ROOT_FOLDER + "/" + optional.get().getUsername() + "/" + optional.get().getSubmissionId();
         zipFolder(sourceDirectoryLocation, fileName);
-        Path file = Paths.get(AppConstants.TEMP_FOLDER + "\\" + fileName + ".zip");
+        Path file = Paths.get(AppConstants.TEMP_FOLDER + "/" + fileName + ".zip");
         Resource resource = new UrlResource(file.toUri());
 
         if (resource.exists() || resource.isReadable()) {
