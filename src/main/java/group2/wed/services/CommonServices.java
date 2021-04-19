@@ -140,6 +140,15 @@ public class CommonServices {
 
     public Assignment editAssignment(EditAssigmentRequest request) {
         try {
+            if (StringUtils.isEmpty(request.getFacultyId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "FacultyId"));
+            }
+            if (StringUtils.isEmpty(request.getAssignmentId())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "assignmentId"));
+            }
+            if (StringUtils.isEmpty(request.getAssignName())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_NULL, "AssignName"));
+            }
             Optional<Assignment> optional = assignmentRepository.findAssignmentById(request.getAssignmentId());
             if (optional.isEmpty()) {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "assignmentId"));
@@ -152,6 +161,7 @@ public class CommonServices {
                 }
                 assignment.setDeadline(optionalDeadline.get());
             }
+            assignment.setFacultyId(request.getFacultyId());
             assignment.setAssignmentName(request.getAssignName());
             assignment.setDescription(request.getDescription());
             assignmentRepository.save(assignment);
@@ -321,14 +331,18 @@ public class CommonServices {
                 throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "Assigment"));
             }
             UserDetails userDetails = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-            if (optionalAssignment.get().getCreate_by().equals(userDetails.getUsername())) {
+            Optional<User> optionalUser = userService.findByUsername(userDetails.getUsername());
+            if (optionalUser.isEmpty()) {
+                throw new AppResponseException(new Message(AppConstants.NOT_FOUND, "username"));
+            }
+            if (optionalAssignment.get().getFacultyId().equals(optionalUser.get().getFacultyId()) && optionalUser.get().getRoleEntity().getRoleId() == 2) {
                 Submission submission = optionalSubmission.get();
                 if (submission.getStatus() == 0) {
                     submission.setStatus(3);
                     submissionRepository.save(submission);
                 }
-            } else if (!optionalSubmission.get().getUsername().equals(userDetails.getUsername())) {
-                throw new AppResponseException(new Message(AppConstants.NOT_ALLOWED, "You are not owner of this assigment or submission"));
+            } else if (!optionalSubmission.get().getUsername().equals(optionalUser.get().getUsername())) {
+                throw new AppResponseException(new Message(AppConstants.NOT_ALLOWED, "You are not owner of this submission or coordinator from valid faculty"));
             }
 
             Comment comment = new Comment();
