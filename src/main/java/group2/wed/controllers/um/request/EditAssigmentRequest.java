@@ -12,4 +12,5 @@ public class EditAssigmentRequest {
     private String assignName;
     private String description;
     private Long deadlineId;
+    private Long facultyId;
 }
